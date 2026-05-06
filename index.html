@@ -3,284 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pakchill POS - Digital System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .bg-pakchill { background-color: #2D5A27; }
-        .text-pakchill { color: #2D5A27; }
-        .bg-nanas { background-color: #FFD700; }
-    </style>
+    <title>Sistem Kasir Pakchill</title>
 </head>
-<body class="bg-gray-100 font-sans">
+<body>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="fixed inset-0 flex items-center justify-center bg-pakchill z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
-            <h1 class="text-2xl font-bold mb-6 text-pakchill">PAKCHILL LOGIN</h1>
-            <input type="password" id="pass-input" placeholder="Masukkan Password" class="w-full border p-3 rounded-lg mb-4 text-center">
-            <button onclick="login()" class="w-full bg-pakchill text-white py-3 rounded-lg font-bold">MASUK</button>
-            <p class="text-xs text-gray-400 mt-4">Kasir: 123 | Owner: 000</p>
-        </div>
-    </div>
+    <!-- SECTION 1: LAYAR LOGIN -->
+    <section id="login-screen">
+        <h1>Login Pakchill</h1>
+        <input type="password" id="login-password" placeholder="Masukkan Password">
+        <button id="btn-login">Masuk</button>
+        <p>Petunjuk: Kasir (123) | Owner (000)</p>
+    </section>
 
-    <!-- MAIN APP -->
-    <div id="app" class="hidden">
-        <!-- Navbar -->
-        <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-            <span class="font-bold text-pakchill text-xl">PAKCHILL POS</span>
-            <div class="flex gap-2">
-                <button id="nav-kasir" onclick="showPage('kasir')" class="px-4 py-2 rounded-lg bg-gray-200 text-sm font-bold">Kasir</button>
-                <button id="nav-owner" onclick="showPage('owner')" class="hidden px-4 py-2 rounded-lg bg-gray-200 text-sm font-bold">Owner</button>
-                <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-100 text-red-600 text-sm font-bold">Keluar</button>
+    <!-- SECTION 2: AREA APLIKASI UTAMA (Disembunyikan sebelum login) -->
+    <main id="main-app" style="display:none;">
+        
+        <!-- Navigasi -->
+        <nav>
+            <h2 id="brand-name">PAKCHILL POS</h2>
+            <div id="nav-links">
+                <button id="nav-to-kasir">Menu Kasir</button>
+                <button id="nav-to-owner" style="display:none;">Menu Owner</button>
+                <button id="btn-logout">Keluar</button>
             </div>
         </nav>
 
-        <!-- KASIR PAGE -->
-        <div id="page-kasir" class="p-4 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Menu & Order -->
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="font-bold mb-4 border-b pb-2">Menu Utama</h2>
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <button onclick="addToCart('PACHOY', 15000)" class="p-4 border-2 border-green-600 rounded-xl hover:bg-green-50">
-                        <span class="block font-bold">PACHOY</span>
-                        <span class="text-xs">Rp 15.000</span>
-                    </button>
-                    <button onclick="addToCart('NANAS', 12000)" class="p-4 border-2 border-yellow-500 rounded-xl hover:bg-yellow-50">
-                        <span class="block font-bold">NANAS</span>
-                        <span class="text-xs">Rp 12.000</span>
-                    </button>
-                </div>
+        <hr>
+
+        <!-- HALAMAN KASIR -->
+        <section id="page-kasir">
+            <h3>Terminal Kasir</h3>
+            
+            <!-- Pilihan Produk -->
+            <div id="product-list">
+                <button id="add-pachoy">Tambah PACHOY (15rb)</button>
+                <button id="add-nanas">Tambah NANAS (12rb)</button>
+            </div>
+
+            <!-- Detail Pesanan -->
+            <div id="order-details">
+                <h4>Keranjang Belanja</h4>
+                <ul id="cart-list">
+                    <!-- Item yang dibeli akan muncul di sini via JS -->
+                </ul>
+                <p>Subtotal: <span id="display-subtotal">0</span></p>
                 
-                <div class="space-y-2">
-                    <input type="text" id="cust-name" placeholder="Nama Pelanggan" class="w-full border p-2 rounded">
-                    <input type="email" id="cust-email" placeholder="Email (untuk struk)" class="w-full border p-2 rounded">
-                    <select id="pay-method" class="w-full border p-2 rounded">
-                        <option value="Cash">Cash</option>
-                        <option value="QRIS">QRIS</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Cart & Checkout -->
-            <div class="bg-white p-6 rounded-xl shadow">
-                <h2 class="font-bold mb-2">Keranjang</h2>
-                <div id="cart-items" class="h-40 overflow-y-auto border-b mb-4 text-sm"></div>
+                <!-- Fitur Diskon & Voucher -->
+                <label>Diskon/Voucher (Rp):</label>
+                <input type="number" id="input-discount" value="0">
                 
-                <div class="space-y-1 mb-4 text-sm">
-                    <div class="flex justify-between"><span>Subtotal:</span><span id="subtotal">0</span></div>
-                    <div class="flex justify-between text-blue-600">
-                        <span>Voucher/Diskon:</span>
-                        <input type="number" id="discount-input" oninput="calculateTotal()" value="0" class="w-20 border text-right">
-                    </div>
-                    <div class="flex justify-between font-bold text-lg border-t pt-2">
-                        <span>TOTAL:</span><span id="grand-total">0</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="processOrder('Sukses')" class="bg-pakchill text-white py-3 rounded-lg font-bold">BAYAR</button>
-                    <button onclick="processOrder('Compliment')" class="bg-blue-500 text-white py-3 rounded-lg font-bold">COMPLIMENT</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- OWNER PAGE -->
-        <div id="page-owner" class="hidden p-4 max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow border-l-4 border-green-500">
-                    <p class="text-gray-500 text-sm">Omzet Hari Ini</p>
-                    <p id="stat-today" class="text-2xl font-bold">Rp 0</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-500">
-                    <p class="text-gray-500 text-sm">Total Transaksi</p>
-                    <p id="stat-count" class="text-2xl font-bold">0</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow border-l-4 border-purple-500">
-                    <button onclick="downloadBackup()" class="w-full bg-purple-600 text-white py-2 rounded font-bold mb-2 text-sm">DOWNLOAD DATA 24 JAM</button>
-                    <p class="text-[10px] text-gray-400">Pastikan download setiap hari sebelum tutup.</p>
-                </div>
+                <h4>Total Tagihan: <span id="display-total">0</span></h4>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow mb-8">
-                <canvas id="salesChart" height="100"></canvas>
+            <!-- Data Pelanggan & Bayar -->
+            <div id="checkout-form">
+                <input type="text" id="customer-name" placeholder="Nama Pelanggan">
+                <input type="email" id="customer-email" placeholder="Email Pelanggan">
+                
+                <select id="payment-method">
+                    <option value="Cash">Tunai (Cash)</option>
+                    <option value="QRIS">QRIS</option>
+                </select>
+
+                <button id="btn-pay">BAYAR & KIRIM STRUK</button>
+                <button id="btn-compliment">COMPLIMENT (GRATIS)</button>
+            </div>
+        </section>
+
+        <!-- HALAMAN OWNER -->
+        <section id="page-owner" style="display:none;">
+            <h3>Dashboard Owner</h3>
+            
+            <!-- Ringkasan Angka -->
+            <div id="stats-summary">
+                <div>
+                    <p>Omzet Hari Ini</p>
+                    <h2 id="total-revenue">0</h2>
+                </div>
+                <div>
+                    <p>Total Transaksi</p>
+                    <h2 id="transaction-count">0</h2>
+                </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow overflow-x-auto">
-                <h3 class="font-bold mb-4">Riwayat Transaksi</h3>
-                <table class="w-full text-left text-sm">
+            <!-- Tombol Backup 24 Jam -->
+            <button id="btn-download-backup">DOWNLOAD LAPORAN (CSV)</button>
+
+            <!-- Grafik Penjualan (Akan diisi Chart.js) -->
+            <div id="chart-container">
+                <canvas id="sales-chart"></canvas>
+            </div>
+
+            <!-- Riwayat & Fitur VOID -->
+            <div id="transaction-history">
+                <h4>Riwayat Penjualan</h4>
+                <table border="1" width="100%">
                     <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
-                            <th class="p-3">Waktu</th><th class="p-3">Nama</th><th class="p-3">Total</th><th class="p-3">Status</th><th class="p-3">Aksi</th>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Pelanggan</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="history-table"></tbody>
+                    <tbody id="history-table-body">
+                        <!-- Data dari LocalStorage muncul di sini -->
+                    </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <script>
-        // DATA & AUTH
-        let currentUser = null;
-        let cart = [];
-        let salesData = JSON.parse(localStorage.getItem('pakchill_sales')) || [];
+    </main>
 
-        function login() {
-            const pass = document.getElementById('pass-input').value;
-            if (pass === '000') {
-                currentUser = 'owner';
-                document.getElementById('nav-owner').classList.remove('hidden');
-            } else if (pass === '123') {
-                currentUser = 'kasir';
-                document.getElementById('nav-owner').classList.add('hidden');
-            } else {
-                alert('Password Salah!'); return;
-            }
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
-            showPage('kasir');
-        }
-
-        function logout() { location.reload(); }
-
-        function showPage(page) {
-            document.getElementById('page-kasir').classList.toggle('hidden', page !== 'kasir');
-            document.getElementById('page-owner').classList.toggle('hidden', page !== 'owner');
-            if(page === 'owner') updateOwnerDashboard();
-        }
-
-        // KASIR LOGIC
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const list = document.getElementById('cart-items');
-            list.innerHTML = cart.map((item, i) => `<div class="flex justify-between py-1 border-b"><span>${item.name}</span><span>${item.price.toLocaleString()}</span></div>`).join('');
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            let subtotal = cart.reduce((sum, i) => sum + i.price, 0);
-            let disc = parseInt(document.getElementById('discount-input').value) || 0;
-            document.getElementById('subtotal').innerText = subtotal.toLocaleString();
-            document.getElementById('grand-total').innerText = (subtotal - disc).toLocaleString();
-        }
-
-        function processOrder(status) {
-            const name = document.getElementById('cust-name').value;
-            const email = document.getElementById('cust-email').value;
-            const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
-            const disc = parseInt(document.getElementById('discount-input').value) || 0;
-            const total = subtotal - disc;
-
-            if (cart.length === 0 || !name) return alert("Isi data pesanan & nama!");
-
-            const transaction = {
-                id: Date.now(),
-                timestamp: new Date().toLocaleString('id-ID'),
-                customer: name,
-                email: email,
-                items: cart.map(i => i.name).join(", "),
-                total: status === 'Compliment' ? 0 : total,
-                method: document.getElementById('pay-method').value,
-                status: status
-            };
-
-            salesData.push(transaction);
-            localStorage.setItem('pakchill_sales', JSON.stringify(salesData));
-
-            // Kirim Email Struk
-            if (email) {
-                const subject = `Struk Pakchill - ${name}`;
-                const body = `Halo ${name},%0D%0ATerima kasih sudah membeli Pakchill!%0D%0A%0D%0ADetail: ${transaction.items}%0D%0ATotal: Rp ${transaction.total.toLocaleString()}%0D%0AMetode: ${transaction.method}%0D%0A%0D%0ASehat Selalu!`;
-                window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-            }
-
-            alert("Transaksi Berhasil!");
-            resetKasir();
-        }
-
-        function resetKasir() {
-            cart = []; document.getElementById('cust-name').value = ''; 
-            document.getElementById('cust-email').value = '';
-            document.getElementById('discount-input').value = '0';
-            updateCartUI();
-        }
-
-        // OWNER LOGIC
-        function updateOwnerDashboard() {
-            const today = new Date().toLocaleDateString('id-ID');
-            const dailySales = salesData.filter(s => s.timestamp.includes(today) && s.status !== 'Void');
-            
-            document.getElementById('stat-today').innerText = "Rp " + dailySales.reduce((sum, s) => sum + s.total, 0).toLocaleString();
-            document.getElementById('stat-count').innerText = dailySales.length;
-
-            const table = document.getElementById('history-table');
-            table.innerHTML = salesData.slice().reverse().map(s => `
-                <tr class="border-b ${s.status === 'Void' ? 'bg-red-50' : ''}">
-                    <td class="p-3">${s.timestamp}</td>
-                    <td class="p-3 font-bold">${s.customer}</td>
-                    <td class="p-3">Rp ${s.total.toLocaleString()}</td>
-                    <td class="p-3"><span class="px-2 py-1 rounded text-xs ${s.status === 'Sukses' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${s.status}</span></td>
-                    <td class="p-3">
-                        ${s.status !== 'Void' ? `<button onclick="voidOrder(${s.id})" class="text-red-500 underline text-xs">Void</button>` : '-'}
-                    </td>
-                </tr>
-            `).join('');
-
-            renderChart();
-        }
-
-        function voidOrder(id) {
-            if(confirm("Batalkan transaksi ini?")) {
-                salesData = salesData.map(s => s.id === id ? {...s, status: 'Void', total: 0} : s);
-                localStorage.setItem('pakchill_sales', JSON.stringify(salesData));
-                updateOwnerDashboard();
-            }
-        }
-
-        function downloadBackup() {
-            let csv = "Timestamp,Customer,Items,Total,Method,Status\n";
-            salesData.forEach(s => {
-                csv += `${s.timestamp},${s.customer},${s.items},${s.total},${s.method},${s.status}\n`;
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('hidden', '');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `Pakchill_Backup_${new Date().toLocaleDateString()}.csv`);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        let myChart;
-        function renderChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            
-            // Logika sederhana: ambil 7 transaksi terakhir untuk grafik
-            const lastData = salesData.filter(s => s.status !== 'Void').slice(-7);
-            
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: lastData.map(s => s.timestamp.split(" ")[1]),
-                    datasets: [{
-                        label: 'Penjualan Terakhir',
-                        data: lastData.map(s => s.total),
-                        borderColor: '#2D5A27',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(45, 90, 39, 0.1)'
-                    }]
-                }
-            });
-        }
-    </script>
 </body>
 </html>
