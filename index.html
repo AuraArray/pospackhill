@@ -3,112 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kasir Pakchill</title>
+    <title>Sistem Kasir Pakchill - Digital POS</title>
+    
+    <!-- 1. PEMANGGILAN CSS (KULIT) -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 2. LIBRARY GRAFIK (OWNER DASHBOARD) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <!-- SECTION 1: LAYAR LOGIN -->
     <section id="login-screen">
-        <h1>Login Pakchill</h1>
-        <input type="password" id="login-password" placeholder="Masukkan Password">
-        <button id="btn-login">Masuk</button>
-        <p>Petunjuk: Kasir (123) | Owner (000)</p>
+        <div style="text-align: center;">
+            <h1 style="font-size: 3rem; margin-bottom: 0;">PAKCHILL</h1>
+            <p style="margin-bottom: 30px; color: var(--pakchill-yellow);">Pachoy & Nanas Segar</p>
+            
+            <input type="password" id="login-password" placeholder="Masukkan Password">
+            <br>
+            <button id="btn-login">MASUK KE SISTEM</button>
+            <p style="font-size: 0.7rem; margin-top: 20px; opacity: 0.7;">
+                Kasir: 123 | Owner: 000
+            </p>
+        </div>
     </section>
 
-    <!-- SECTION 2: AREA APLIKASI UTAMA (Disembunyikan sebelum login) -->
+    <!-- SECTION 2: AREA APLIKASI UTAMA (Akan muncul setelah login) -->
     <main id="main-app" style="display:none;">
         
-        <!-- Navigasi -->
+        <!-- Navigasi Atas -->
         <nav>
             <h2 id="brand-name">PAKCHILL POS</h2>
             <div id="nav-links">
-                <button id="nav-to-kasir">Menu Kasir</button>
-                <button id="nav-to-owner" style="display:none;">Menu Owner</button>
+                <button id="nav-to-kasir">🛒 Terminal Kasir</button>
+                <!-- Menu Owner disembunyikan jika login sebagai kasir -->
+                <button id="nav-to-owner" style="display:none;">📊 Dashboard Owner</button>
                 <button id="btn-logout">Keluar</button>
             </div>
         </nav>
 
-        <hr>
-
-        <!-- HALAMAN KASIR -->
+        <!-- HALAMAN KASIR (ZONA TRANSAKSI) -->
         <section id="page-kasir">
-            <h3>Terminal Kasir</h3>
-            
-            <!-- Pilihan Produk -->
+            <!-- Kolom Kiri: Menu Produk -->
             <div id="product-list">
-                <button id="add-pachoy">Tambah PACHOY (15rb)</button>
-                <button id="add-nanas">Tambah NANAS (12rb)</button>
+                <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--pakchill-green); padding-bottom: 5px;">Menu Minuman</h3>
+                <button id="add-pachoy">
+                    PACHOY SEGAR<br>
+                    <small>Rp 15.000</small>
+                </button>
+                <button id="add-nanas">
+                    NANAS MADU<br>
+                    <small>Rp 12.000</small>
+                </button>
             </div>
 
-            <!-- Detail Pesanan -->
-            <div id="order-details">
-                <h4>Keranjang Belanja</h4>
-                <ul id="cart-list">
-                    <!-- Item yang dibeli akan muncul di sini via JS -->
-                </ul>
-                <p>Subtotal: <span id="display-subtotal">0</span></p>
-                
-                <!-- Fitur Diskon & Voucher -->
-                <label>Diskon/Voucher (Rp):</label>
-                <input type="number" id="input-discount" value="0">
-                
-                <h4>Total Tagihan: <span id="display-total">0</span></h4>
-            </div>
+            <!-- Kolom Kanan: Rincian & Pembayaran -->
+            <div id="order-details-container">
+                <div id="order-details">
+                    <h3 style="margin-bottom: 10px;">Keranjang Belanja</h3>
+                    <ul id="cart-list">
+                        <!-- Item muncul otomatis via JS -->
+                    </ul>
+                    <div style="border-top: 2px solid #eee; padding-top: 10px; margin-top: 10px;">
+                        <p style="display: flex; justify-content: space-between;">
+                            Subtotal: <span>Rp <span id="display-subtotal">0</span></span>
+                        </p>
+                        
+                        <!-- Input Diskon / Voucher -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; color: blue;">
+                            <label for="input-discount">Diskon/Voucher:</label>
+                            <span>- Rp <input type="number" id="input-discount" value="0" style="width: 80px; text-align: right;"></span>
+                        </div>
 
-            <!-- Data Pelanggan & Bayar -->
-            <div id="checkout-form">
-                <input type="text" id="customer-name" placeholder="Nama Pelanggan">
-                <input type="email" id="customer-email" placeholder="Email Pelanggan">
-                
-                <select id="payment-method">
-                    <option value="Cash">Tunai (Cash)</option>
-                    <option value="QRIS">QRIS</option>
-                </select>
+                        <h2 style="display: flex; justify-content: space-between; margin-top: 10px; color: var(--pakchill-green);">
+                            TOTAL: <span>Rp <span id="display-total">0</span></span>
+                        </h2>
+                    </div>
+                </div>
 
-                <button id="btn-pay">BAYAR & KIRIM STRUK</button>
-                <button id="btn-compliment">COMPLIMENT (GRATIS)</button>
+                <!-- Formulir Data Pelanggan -->
+                <div id="checkout-form" style="margin-top: 20px;">
+                    <h4 style="margin-bottom: 10px;">Data Pelanggan & Pembayaran</h4>
+                    <input type="text" id="customer-name" placeholder="Nama Pelanggan (Wajib)">
+                    <input type="email" id="customer-email" placeholder="Email (opsional untuk struk)">
+                    
+                    <select id="payment-method">
+                        <option value="Cash">Tunai (Cash)</option>
+                        <option value="QRIS">QRIS / Non-Tunai</option>
+                    </select>
+
+                    <button id="btn-pay">PROSES BAYAR & STRUK</button>
+                    <button id="btn-compliment">COMPLIMENT (GRATIS)</button>
+                </div>
             </div>
         </section>
 
-        <!-- HALAMAN OWNER -->
+        <!-- HALAMAN OWNER (ZONA REKAP & MANAJERIAL) -->
         <section id="page-owner" style="display:none;">
-            <h3>Dashboard Owner</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Dashboard Manajerial</h3>
+                <button id="btn-download-backup">📥 DOWNLOAD LAPORAN CSV (24 JAM)</button>
+            </div>
             
-            <!-- Ringkasan Angka -->
+            <!-- Statistik Ringkas -->
             <div id="stats-summary">
                 <div>
-                    <p>Omzet Hari Ini</p>
-                    <h2 id="total-revenue">0</h2>
+                    <p style="color: gray; font-size: 0.8rem;">OMZET BERSIH</p>
+                    <h2 id="total-revenue" style="color: var(--pakchill-green);">Rp 0</h2>
                 </div>
                 <div>
-                    <p>Total Transaksi</p>
+                    <p style="color: gray; font-size: 0.8rem;">TOTAL TRANSAKSI</p>
                     <h2 id="transaction-count">0</h2>
                 </div>
             </div>
 
-            <!-- Tombol Backup 24 Jam -->
-            <button id="btn-download-backup">DOWNLOAD LAPORAN (CSV)</button>
-
-            <!-- Grafik Penjualan (Akan diisi Chart.js) -->
-            <div id="chart-container">
-                <canvas id="sales-chart"></canvas>
+            <!-- Grafik Penjualan -->
+            <div id="chart-container" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                <h4 style="margin-bottom: 15px;">Grafik Penjualan Terakhir</h4>
+                <canvas id="sales-chart" height="80"></canvas>
             </div>
 
-            <!-- Riwayat & Fitur VOID -->
+            <!-- Tabel Riwayat Penjualan -->
             <div id="transaction-history">
-                <h4>Riwayat Penjualan</h4>
-                <table border="1" width="100%">
+                <h4 style="margin-bottom: 10px;">Riwayat Transaksi & Void</h4>
+                <table border="0" width="100%">
                     <thead>
                         <tr>
                             <th>Waktu</th>
                             <th>Pelanggan</th>
+                            <th>Item</th>
                             <th>Total</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="history-table-body">
-                        <!-- Data dari LocalStorage muncul di sini -->
+                        <!-- Baris transaksi akan diisi oleh script.js -->
                     </tbody>
                 </table>
             </div>
@@ -116,5 +146,7 @@
 
     </main>
 
+    <!-- 3. PEMANGGILAN JAVASCRIPT (OTAK) -->
+    <script src="script.js"></script>
 </body>
 </html>
