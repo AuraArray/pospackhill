@@ -1,6 +1,3 @@
-/* ==========================================================================
-   PAKCHILL ENTERPRISE BRAND IDENTITIES & CORE STYLES
-   ========================================================================== */
 :root {
     --pakchill-green-dark: #2d5a27;
     --pakchill-green-soft: #428238;
@@ -12,26 +9,16 @@
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-body {
-    background-color: #f4f7f3;
-    overflow-x: hidden;
-    color: #333;
-}
+body { background-color: #f4f7f3; overflow-x: hidden; color: #333; }
 
-/* BACKGROUND AMBIENT MOTION ANIMATION */
 .ambient-motion-bg {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: -2;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
     background: linear-gradient(135deg, #e2f0df 0%, #fdfbf7 50%, #d5ebd0 100%);
-    background-size: 400% 400%;
-    animation: flowAmbientGradient 25s ease infinite;
+    background-size: 400% 400%; animation: flowAmbientGradient 25s ease infinite;
 }
 
 @keyframes flowAmbientGradient {
@@ -40,345 +27,101 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-/* APP LAYER NAVIGATION */
 .app-header-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--pakchill-glass);
-    backdrop-filter: blur(10px);
-    padding: 15px 25px;
-    border-bottom: 2px solid rgba(45, 90, 39, 0.15);
-    position: sticky;
-    top: 0; z-index: 100;
-}
-
-.header-brand-title h2 {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--pakchill-green-dark);
-    letter-spacing: -0.5px;
-}
-
-.header-status-control {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.order-seq-badge {
-    background: #000; color: #fff;
-    padding: 5px 12px; font-weight: 900;
-    font-size: 13px; border-radius: 6px;
-}
-
-.role-badge {
-    color: #fff; padding: 5px 12px;
-    font-weight: 700; font-size: 12px;
-    border-radius: 6px; text-transform: uppercase;
-}
-
-.btn-logout-sys {
-    background: var(--pakchill-crimson); color: white;
-    border: none; padding: 6px 12px; font-weight: bold;
-    border-radius: 6px; cursor: pointer; font-size: 12px;
-}
-
-/* GRID OPERASIONAL UTAMA */
-.grid-core-layout {
-    padding: 20px;
-    max-width: 1600px;
-    margin: 0 auto;
-}
-
-.panel-section-title {
-    font-size: 15px; color: var(--pakchill-green-dark);
-    font-weight: 800; margin-bottom: 12px;
-    border-left: 4px solid var(--pakchill-green-dark);
-    padding-left: 8px; text-transform: uppercase;
-}
-
-/* TERMINAL WORKSPACE KASIR LAYOUT Side-by-Side */
-.kasir-workspace-grid {
-    display: grid;
-    grid-template-columns: 1fr 420px;
-    gap: 20px;
-}
-
-.katalog-panel-container, .terminal-panel-container {
-    background: var(--pakchill-glass);
-    border-radius: var(--radius-premium);
-    padding: 18px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.03);
-    border: 1px solid rgba(255,255,255,0.7);
-}
-
-/* GRID KATALOG FEED */
-.products-grid-feed {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px;
-}
-
-.product-item-card {
-    background: #ffffff;
-    border-radius: 10px; padding: 15px;
-    text-align: center; cursor: pointer;
-    position: relative; overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.05);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.product-item-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(45,90,39,0.1);
-}
-
-.badge-bundling-tag {
-    position: absolute; top: 0; left: 0;
-    background: var(--pakchill-gold); color: white;
-    font-size: 9px; font-weight: 900;
-    padding: 2px 8px; border-bottom-right-radius: 8px;
-    text-transform: uppercase;
-}
-
-.badge-complimentary-tag {
-    position: absolute; top: 0; left: 0;
-    background: #5856d6; color: white;
-    font-size: 9px; font-weight: 900;
-    padding: 2px 8px; border-bottom-right-radius: 8px;
-    text-transform: uppercase;
-}
-
-/* KERANJANG & BILLING AREA */
-.cart-items-scrollbox {
-    max-height: 240px; overflow-y: auto;
-    background: rgba(0,0,0,0.02);
-    border-radius: 8px; padding: 10px; margin-bottom: 15px;
-}
-
-.cart-item-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
+    background: var(--pakchill-glass); backdrop-filter: blur(10px);
+    padding: 15px 25px; border-bottom: 2px solid rgba(45, 90, 39, 0.15);
+    position: sticky; top: 0; z-index: 100;
 }
 
-.member-loyalty-widget, .discount-calculator-box, .closing-shift-widget {
-    background: rgba(45,90,39,0.04); border-radius: 8px;
-    padding: 12px; margin-bottom: 15px;
-    border: 1px solid rgba(45,90,39,0.05);
-}
+.header-brand-title h2 { font-size: 20px; font-weight: 800; color: var(--pakchill-green-dark); }
+.header-status-control { display: flex; align-items: center; gap: 12px; }
+.order-seq-badge { background: #000; color: #fff; padding: 5px 12px; font-weight: 900; font-size: 13px; border-radius: 6px; }
+.role-badge { color: #fff; padding: 5px 12px; font-weight: 700; font-size: 12px; border-radius: 6px; text-transform: uppercase; }
+.btn-logout-sys { background: var(--pakchill-crimson); color: white; border: none; padding: 6px 12px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
-.member-loyalty-widget h4, .closing-shift-widget h4 {
-    font-size: 13px; font-weight: 800; color: var(--pakchill-green-dark); margin-bottom: 8px;
-}
+.grid-core-layout { padding: 20px; max-width: 1600px; margin: 0 auto; }
+.panel-section-title { font-size: 15px; color: var(--pakchill-green-dark); font-weight: 800; margin-bottom: 12px; border-left: 4px solid var(--pakchill-green-dark); padding-left: 8px; }
 
-.fast-register-member-form {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;
-}
+.kasir-workspace-grid { display: grid; grid-template-columns: 1fr 420px; gap: 20px; }
+.katalog-panel-container, .terminal-panel-container { background: var(--pakchill-glass); border-radius: var(--radius-premium); padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.7); }
+.products-grid-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
 
-.fast-register-member-form button {
-    grid-column: span 2; background: var(--pakchill-green-dark);
-    color: white; border: none; padding: 5px; font-size: 11px;
-    font-weight: bold; border-radius: 4px; cursor: pointer;
-}
+.product-item-card { background: #ffffff; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); transition: transform 0.15s ease; }
+.product-item-card:hover { transform: translateY(-3px); }
+.badge-bundling-tag { position: absolute; top: 0; left: 0; background: var(--pakchill-gold); color: white; font-size: 9px; font-weight: 900; padding: 2px 8px; border-bottom-right-radius: 8px; }
+.badge-complimentary-tag { position: absolute; top: 0; left: 0; background: #5856d6; color: white; font-size: 9px; font-weight: 900; padding: 2px 8px; border-bottom-right-radius: 8px; }
 
-.discount-calculator-box {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-}
+.cart-items-scrollbox { max-height: 240px; overflow-y: auto; background: rgba(0,0,0,0.02); border-radius: 8px; padding: 10px; margin-bottom: 15px; }
+.cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
 
-.input-field-group label {
-    font-size: 10px; font-weight: 700; color: #555; display: block; margin-bottom: 3px;
-}
+.member-loyalty-widget, .discount-calculator-box, .closing-shift-widget { background: rgba(45,90,39,0.04); border-radius: 8px; padding: 12px; margin-bottom: 15px; border: 1px solid rgba(45,90,39,0.05); }
+.member-loyalty-widget h4, .closing-shift-widget h4 { font-size: 13px; font-weight: 800; color: var(--pakchill-green-dark); margin-bottom: 8px; }
+.fast-register-member-form { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.fast-register-member-form button { grid-column: span 2; background: var(--pakchill-green-dark); color: white; border: none; padding: 5px; font-size: 11px; font-weight: bold; border-radius: 4px; cursor: pointer; }
 
-input, select {
-    width: 100%; padding: 8px 10px; font-size: 13px;
-    border: 1px solid #ccc; border-radius: 6px; background: #fff;
-}
+.discount-calculator-box { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.input-field-group label { font-size: 10px; font-weight: 700; color: #555; display: block; margin-bottom: 3px; }
+input, select { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid #ccc; border-radius: 6px; background: #fff; margin-bottom: 5px; }
 
-input:focus, select:focus {
-    outline: none; border-color: var(--pakchill-green-dark);
-}
+.billing-summary-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; padding: 15px; }
+.bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+.grand-total-row { font-size: 18px; font-weight: 900; color: var(--pakchill-green-dark); border-top: 2px dashed #eee; padding-top: 8px; }
 
-.billing-summary-card {
-    background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 10px; padding: 15px;
-}
+.payment-sub-branch { background: #fdfaf2; border-radius: 6px; padding: 10px; margin-bottom: 12px; border: 1px solid rgba(255,149,0,0.15); }
+.qris-image-container { text-align: center; margin-top: 8px; }
+.qris-image-container img { width: 100%; max-width: 200px; height: auto; border-radius: 6px; }
+.live-bank-notice-card { font-size: 12px; font-weight: bold; color: var(--pakchill-green-dark); margin-top: 6px; background: #eaf4e8; padding: 6px; border-radius: 4px; }
 
-.bill-row {
-    display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;
-}
-
-.grand-total-row {
-    font-size: 18px; font-weight: 900; color: var(--pakchill-green-dark);
-    border-top: 2px dashed #eee; padding-top: 8px; margin-top: 5px;
-}
-
-.payment-selection-wrapper { margin: 12px 0; }
-.payment-selection-wrapper label { font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; }
-
-.payment-sub-branch {
-    background: #fdfaf2; border-radius: 6px; padding: 10px;
-    margin-bottom: 12px; border: 1px solid rgba(255,149,0,0.15);
-}
-
-.qris-image-container {
-    text-align: center; margin-top: 8px;
-}
-
-.qris-image-container img {
-    width: 100%; max-width: 200px; height: auto; border-radius: 6px;
-}
-
-.live-bank-notice-card {
-    font-size: 12px; font-weight: bold; color: var(--pakchill-green-dark);
-    margin-top: 6px; background: #eaf4e8; padding: 6px; border-radius: 4px;
-}
-
-.checkout-actions-container {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
-}
-
-.checkout-actions-container button {
-    padding: 10px; font-size: 12px; font-weight: 900; border: none;
-    border-radius: 6px; cursor: pointer; text-transform: uppercase;
-}
-
+.checkout-actions-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.checkout-actions-container button { padding: 10px; font-size: 12px; font-weight: 900; border: none; border-radius: 6px; cursor: pointer; }
 .btn-action-save { background: #e2e2e7; color: #333; }
 .btn-action-print { background: var(--pakchill-green-dark); color: white; }
 
-/* REKAP CLOSING */
 .closing-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .closing-card { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
-.closing-card h5 { font-size: 10px; color: #666; }
-.closing-card span { font-size: 13px; font-weight: bold; color: #000; }
-.closing-menu-breakdown h5 { font-size: 11px; margin: 8px 0 4px 0; }
 .closing-list-box { max-height: 100px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-
 .export-buttons-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
-.export-buttons-group button, .filter-actions-group button {
-    border: none; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 5px; cursor: pointer; color: white;
-}
-.btn-pdf { background: #ff3b30; }
-.btn-excel { background: #34c759; }
+.btn-pdf { background: #ff3b30; color: white; border:none; padding:6px; font-weight:bold; border-radius:5px; cursor:pointer;}
+.btn-excel { background: #34c759; color: white; border:none; padding:6px; font-weight:bold; border-radius:5px; cursor:pointer;}
 
-/* ==========================================================================
-   OWNER INNER AREA HUB STYLES
-   ========================================================================== */
-.owner-hub-dashboard {
-    background: var(--pakchill-glass); border-radius: var(--radius-premium);
-    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-}
-
+.owner-hub-dashboard { background: var(--pakchill-glass); border-radius: var(--radius-premium); padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
 .owner-hub-title { font-size: 18px; font-weight: 900; color: #5856d6; margin-bottom: 18px; }
+.owner-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.metric-card { background: #ffffff; padding: 18px; border-radius: 10px; border-left: 5px solid #5856d6; }
+.metric-card h4 { font-size: 12px; color: #666; margin-bottom: 5px; }
+.metric-card span { font-size: 20px; font-weight: 900; }
 
-.owner-metrics-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;
-}
-
-.metric-card {
-    background: #ffffff; padding: 18px; border-radius: 10px;
-    border-left: 5px solid #5856d6; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-}
-
-.metric-card h4 { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-.metric-card span { font-size: 20px; font-weight: 900; color: #1c1c1e; }
-
-.chart-visualization-container {
-    background: #ffffff; padding: 18px; border-radius: 12px; margin-bottom: 25px;
-    border: 1px solid rgba(0,0,0,0.06);
-}
-
+.chart-visualization-container { background: #ffffff; padding: 18px; border-radius: 12px; margin-bottom: 25px; }
 .canvas-wrapper { position: relative; height: 260px; width: 100%; }
+.owner-management-accordion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.management-card-form { background: #ffffff; padding: 18px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); }
+.management-card-form h4 { font-size: 14px; font-weight: 800; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+.sub-form-block button { background: #5856d6; color: white; border: none; padding: 8px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; }
 
-.owner-management-accordion-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-}
-
-.management-card-form {
-    background: #ffffff; padding: 18px; border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.06);
-}
-
-.management-card-form h4 { font-size: 14px; font-weight: 800; color: #1c1c1e; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
-.sub-form-block h5 { font-size: 12px; color: #555; margin-bottom: 5px; }
-.sub-form-block input, .sub-form-block select { margin-bottom: 6px; }
-.sub-form-block button {
-    background: #5856d6; color: white; border: none; padding: 8px;
-    font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; font-size: 12px;
-}
-
-/* DATA TABLE CONFIG */
 .table-scroll-container { max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
-.owner-data-table {
-    width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;
-}
-
-.owner-data-table th {
-    background: #f5f5f7; padding: 10px; font-weight: 700; color: #333; position: sticky; top: 0; z-index: 2;
-}
-
-.owner-data-table td { padding: 10px; border-bottom: 1px solid #eee; background: #fff; }
+.owner-data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.owner-data-table th { background: #f5f5f7; padding: 10px; font-weight: 700; position: sticky; top: 0; z-index: 2; }
+.owner-data-table td { padding: 10px; border-bottom: 1px solid #eee; }
 
 .log-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .filter-actions-group { display: flex; gap: 8px; }
-.filter-actions-group select { width: 140px; }
 
-/* ==========================================================================
-   LOGIN MODULE DISPLAY OVERLAY
-   ========================================================================== */
-.login-wrapper-layer {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: linear-gradient(135deg, #2d5a27 0%, #173314 100%);
-    display: flex; justify-content: center; align-items: center; z-index: 2000;
-}
-
-.login-premium-card {
-    background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15); width: 100%; max-width: 350px;
-    padding: 30px; border-radius: 20px; text-align: center; color: white;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-}
-
-.logo-pakchill-container {
-    width: 100px; height: 100px; border-radius: 22%;
-    background: rgba(255,255,255,0.1); margin: 0 auto 15px auto;
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden; border: 2px solid rgba(255,255,255,0.3);
-}
-
+.login-wrapper-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #2d5a27 0%, #173314 100%); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+.login-premium-card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); width: 100%; max-width: 350px; padding: 30px; border-radius: 20px; text-align: center; color: white; }
+.logo-pakchill-container { width: 100px; height: 100px; border-radius: 22%; background: rgba(255,255,255,0.1); margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; border: 2px solid rgba(255,255,255,0.3); }
 .logo-pakchill-container img { width: 100%; height: 100%; object-fit: cover; }
+.login-input-box input { text-align: center; font-size: 16px; letter-spacing: 4px; padding: 12px; background: white; color: #000; border: none; border-radius: 8px; margin-bottom: 10px; }
+.btn-login-submit { width: 100%; background: var(--pakchill-gold); color: white; border: none; padding: 12px; font-weight: 900; border-radius: 8px; cursor: pointer; }
 
-.login-premium-card h3 { font-size: 16px; font-weight: 900; letter-spacing: 2px; }
-
-.login-input-box input {
-    text-align: center; font-size: 16px; letter-spacing: 4px; padding: 12px;
-    background: white; color: #000; border: none; border-radius: 8px; margin-bottom: 10px;
-}
-
-.btn-login-submit {
-    width: 100%; background: var(--pakchill-gold); color: white;
-    border: none; padding: 12px; font-weight: 900; font-size: 13px;
-    border-radius: 8px; cursor: pointer; letter-spacing: 1px;
-}
-
-/* ==========================================================================
-   RESPONSIVE LAYOUT RESPONSIVENESS (MOBILE FRIENDLY)
-   ========================================================================== */
 @media (max-width: 1024px) {
-    .kasir-workspace-grid { grid-template-columns: 1fr; }
-    .owner-management-accordion-grid { grid-template-columns: 1fr; }
+    .kasir-workspace-grid, .owner-management-accordion-grid { grid-template-columns: 1fr; }
     .management-card-form { grid-column: span 1 !important; }
 }
-
 @media (max-width: 480px) {
     .products-grid-feed { grid-template-columns: 1fr 1fr; }
-    .app-header-nav { flex-direction: column; gap: 10px; text-align: center; }
-    .header-status-control { width: 100%; justify-content: center; }
     .checkout-actions-container { grid-template-columns: 1fr; }
-    .grid-core-layout { padding: 10px; }
 }
-
-/* THERMAL PRINTER FORMAT RULES */
 @media print {
     body * { visibility: hidden; }
     .thermal-print-area, .thermal-print-area * { visibility: visible; }
