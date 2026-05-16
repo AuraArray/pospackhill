@@ -1,568 +1,544 @@
 // ==========================================================================
-// INITIALIZATION & DATABASE SEEDING (LOCALSTORAGE)
+// 1. ENGINE DATABASE CORE (LOCALSTORAGE RECONCILIATION)
 // ==========================================================================
-let currentRole = null;
-let cart = [];
-let monthlyChartInstance = null;
+let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v5')) || {
+    menu: [
+        { id: 'm1', name: 'PACHOY', price: 15000 },
+        { id: 'm2', name: 'NANAS', price: 12000 }
+    ],
+    bundles: [],
+    vouchers: [
+        { code: 'PAKCHILLSEHAT', nominal: 5000, type: 'Voucher' }
+    ],
+    rekening: [
+        { bank: 'BCA', nomor: '8410923121 a/n PT PAKCHILL' },
+        { bank: 'GoPay', nomor: '081234567890 a/n PAKCHILL INDO' }
+    ],
+    members: [
+        { name: 'APRIl', wa: '0812', poin: 10 }
+    ],
+    transactions: []
+};
 
-// Ambil atau set up database produk default
-let menuDatabase = JSON.parse(localStorage.getItem('pakchill_menu_db'));
-if (!menuDatabase || menuDatabase.length === 0) {
-    menuDatabase = [
-        { id: 'p1', name: 'PACHOY', price: 15000 },
-        { id: 'p2', name: 'NANAS', price: 12000 }
-    ];
-    localStorage.setItem('pakchill_menu_db', JSON.stringify(menuDatabase));
-}
+let activeRole = null;
+let activeCart = [];
+let activeMemberObj = null;
+let chartInstanceGlobal = null;
 
-// Ambil atau set up database transaksi
-let transactionDatabase = JSON.parse(localStorage.getItem('pakchill_pos_db')) || [];
-
-// Tunggu DOM selesai dimuat
-document.addEventListener('DOMContentLoaded', () => {
-    initEventListeners();
-    renderKatalog();
-});
-
-// ==========================================================================
-// EVENT LISTENERS REGISTER
-// ==========================================================================
-function initEventListeners() {
-    // Auth & Navigation
-    document.getElementById('btn-login').addEventListener('click', handleLogin);
-    document.getElementById('login-password').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
-    document.getElementById('btn-logout').addEventListener('click', handleLogout);
-    document.getElementById('nav-btn-kasir').addEventListener('click', () => switchTab('kasir'));
-    document.getElementById('nav-btn-owner').addEventListener('click', () => switchTab('owner'));
-
-    // Kasir Finansial & Input
-    document.getElementById('input-diskon').addEventListener('input', calculateCartTotal);
-    document.getElementById('input-voucher').addEventListener('input', calculateCartTotal);
-    document.getElementById('main-payment-method').addEventListener('change', handlePaymentBranching);
-
-    // Kasir Checkout Actions
-    document.getElementById('btn-submit-compliment').addEventListener('click', () => processCheckout('Compliment'));
-    document.getElementById('btn-checkout-email').addEventListener('click', () => processCheckout('Email'));
-    document.getElementById('btn-checkout-print').addEventListener('click', () => processCheckout('Print'));
-    document.getElementById('btn-close-qris-modal').addEventListener('click', closeQrisModalAndFinalize);
-
-    // Owner Actions
-    document.getElementById('btn-save-new-product').addEventListener('click', handleAddNewProduct);
-    document.getElementById('filter-month-owner').addEventListener('change', renderHistoryTable);
-    document.getElementById('btn-export-pdf').addEventListener('click', exportOwnerReportPDF);
-    document.getElementById('btn-export-excel').addEventListener('click', exportOwnerReportExcel);
+function saveToStorage() {
+    localStorage.setItem('pakchill_enterprise_db_v5', JSON.stringify(sysDatabase));
 }
 
 // ==========================================================================
-// GERBANG OTENTIKASI & SEGREGASI HAK AKSES
+// 2. OTENTIKASI SISTEM (KASIR: 123 | OWNER: 000)
 // ==========================================================================
-function handleLogin() {
-    const pinInput = document.getElementById('login-password').value;
+function executeAuthentication() {
+    const pin = document.getElementById('sys-pin-access').value.trim();
     
-    if (pinInput === '123') {
-        currentRole = 'kasir';
-        document.getElementById('badge-role').textContent = 'Staff Kasir';
-        document.getElementById('nav-btn-owner').style.display = 'none';
-        executeUnlock();
-    } else if (pinInput === '000') {
-        currentRole = 'owner';
-        document.getElementById('badge-role').textContent = 'Owner App';
-        document.getElementById('nav-btn-owner').style.display = 'block';
-        executeUnlock();
+    if (pin === '123') {
+        activeRole = 'kasir';
+        document.getElementById('badge-status-role').innerText = 'Staff Kasir';
+        document.getElementById('badge-status-role').style.background = '#2d5a27';
+        document.getElementById('view-segment-kasir').style.display = 'grid';
+        document.getElementById('view-segment-owner').style.display = 'none';
+        document.getElementById('owner-filter-wrapper').style.display = 'none'; // Sembunyikan filter bulan milik owner
+        unlockInterface();
+    } else if (pin === '000') {
+        activeRole = 'owner';
+        document.getElementById('badge-status-role').innerText = 'Owner Control';
+        document.getElementById('badge-status-role').style.background = '#5856d6';
+        document.getElementById('view-segment-kasir').style.display = 'block';
+        document.getElementById('view-segment-owner').style.display = 'block';
+        document.getElementById('owner-filter-wrapper').style.display = 'flex'; // Munculkan filter bulan untuk owner
+        unlockInterface();
+        renderOwnerDashboardMetrics(); // Render Chart & Angka Finansial Agar Tidak Kosong
     } else {
-        alert('PIN Akses Salah. Keamanan Terkunci!');
+        alert('PIN Otentikasi Salah! Akses Sistem Terkunci.');
     }
 }
 
-function executeUnlock() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
-    document.getElementById('login-password').value = '';
-    switchTab('kasir');
+function unlockInterface() {
+    document.getElementById('login-screen-overlay').style.display = 'none';
+    document.getElementById('main-app-layer').style.display = 'block';
+    document.getElementById('sys-pin-access').value = '';
+    renderKatalogKasir();
+    renderCartUI();
+    renderHistoryTable();
+    renderMemberTable();
 }
 
-function handleLogout() {
-    currentRole = null;
-    cart = [];
-    renderCart();
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-}
-
-function switchTab(tabName) {
-    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.page-view').forEach(view => view.classList.remove('active-view'));
-
-    if (tabName === 'kasir') {
-        document.getElementById('nav-btn-kasir').classList.add('active');
-        document.getElementById('page-kasir').classList.add('active-view');
-    } else if (tabName === 'owner' && currentRole === 'owner') {
-        document.getElementById('nav-btn-owner').classList.add('active');
-        document.getElementById('page-owner').classList.add('active-view');
-        // Refresh data Owner metrics
-        calculateOwnerMetrics();
-        renderHistoryTable();
-    }
+function triggerSystemLogout() {
+    activeRole = null;
+    activeCart = [];
+    activeMemberObj = null;
+    document.getElementById('main-app-layer').style.display = 'none';
+    document.getElementById('login-screen-overlay').style.display = 'flex';
 }
 
 // ==========================================================================
-// MODUL TERMINAL KASIR OPERASIONAL
+// 3. ENGINE UTAMA KATALOG & OPERASIONAL KASIR
 // ==========================================================================
-function renderKatalog() {
-    const container = document.getElementById('katalog-container');
+function renderKatalogKasir() {
+    const target = document.getElementById('katalog-render-target');
+    target.innerHTML = '';
+
+    // Menu Reguler
+    sysDatabase.menu.forEach(item => {
+        target.innerHTML += `
+            <div class="product-item-card" onclick="pushItemToCart('${item.name}', ${item.price})">
+                <div style="font-weight:900; font-size:15px; color:var(--pakchill-green-dark);">${item.name}</div>
+                <div style="color:var(--pakchill-green-soft); font-weight:700; margin-top:5px;">Rp ${item.price.toLocaleString('id-ID')}</div>
+            </div>
+        `;
+    });
+
+    // Paket Bundling Promo Owner
+    sysDatabase.bundles.forEach(bundle => {
+        target.innerHTML += `
+            <div class="product-item-card" onclick="pushItemToCart('${bundle.name}', ${bundle.price})">
+                <span class="badge-bundling-tag">Paket</span>
+                <div style="font-weight:900; font-size:14px; color:#ff9500; margin-top:10px;">${bundle.name}</div>
+                <div style="color:var(--pakchill-green-soft); font-weight:700; margin-top:5px;">Rp ${bundle.price.toLocaleString('id-ID')}</div>
+            </div>
+        `;
+    });
+}
+
+function pushItemToCart(name, price) {
+    activeCart.push({ name, price, uid: Date.now() + Math.random() });
+    renderCartUI();
+}
+
+function removeItemFromCart(uid) {
+    activeCart = activeCart.filter(item => item.uid !== uid);
+    renderCartUI();
+}
+
+function renderCartUI() {
+    const container = document.getElementById('cart-items-wrapper');
     container.innerHTML = '';
     
-    menuDatabase.forEach(product => {
-        const card = document.createElement('div');
-        card.className = 'product-item-card';
-        card.innerHTML = `
-            <div class="pro-icon-avatar">${product.name.charAt(0)}</div>
-            <div class="pro-name">${product.name}</div>
-            <div class="pro-price">Rp ${product.price.toLocaleString('id-ID')}</div>
+    if (activeCart.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#999; font-size:13px; padding:20px;">Keranjang belanja kosong.</p>';
+        document.getElementById('txt-subtotal-val').innerText = 'Rp 0';
+        document.getElementById('txt-grand-total-display').innerText = 'Rp 0';
+        return;
+    }
+
+    activeCart.forEach(item => {
+        container.innerHTML += `
+            <div class="cart-item-row">
+                <div style="width: 45%; font-weight:bold; font-size:13px;">${item.name}</div>
+                <div style="width: 35%; text-align: right; font-size:13px; color:#333;">Rp ${item.price.toLocaleString('id-ID')}</div>
+                <div style="width: 20%; text-align: right;">
+                    <button onclick="removeItemFromCart(${item.uid})" style="width:auto; margin:0; padding:3px 8px; background:#ff3b30; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:11px;">✕</button>
+                </div>
+            </div>
         `;
-        card.addEventListener('click', () => addToCart(product));
-        container.appendChild(card);
     });
-}
-
-function addToCart(product) {
-    cart.push({ ...product, cartId: Date.now() + Math.random() });
-    renderCart();
-}
-
-function removeFromCart(cartId) {
-    cart = cart.filter(item => item.cartId !== cartId);
-    renderCart();
-}
-
-function renderCart() {
-    const tbody = document.getElementById('cart-table-body');
-    tbody.innerHTML = '';
-
-    cart.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><b>${item.name}</b></td>
-            <td>Rp ${item.price.toLocaleString('id-ID')}</td>
-            <td style="text-align: center;">
-                <button class="btn-delete-item" onclick="removeFromCart(${item.cartId})">✕</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-    calculateCartTotal();
-}
-
-function calculateCartTotal() {
-    const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
-    const diskon = parseInt(document.getElementById('input-diskon').value) || 0;
-    const voucher = parseInt(document.getElementById('input-voucher').value) || 0;
-    
-    let total = subtotal - diskon - voucher;
-    if (total < 0) total = 0; // Mengunci batas minimum total Rp 0 sesuai rumus blueprint
-
-    document.getElementById('summary-subtotal').textContent = `Rp ${subtotal.toLocaleString('id-ID')}`;
-    document.getElementById('summary-total').textContent = `Rp ${total.toLocaleString('id-ID')}`;
-    return { subtotal, diskon, voucher, total };
-}
-
-// LOGIKA PERCABANGAN METODE PEMBAYARAN
-function handlePaymentBranching() {
-    const mainMethod = document.getElementById('main-payment-method').value;
-    const qrisWrapper = document.getElementById('sub-qris-wrapper');
-    const transferWrapper = document.getElementById('sub-transfer-wrapper');
-
-    qrisWrapper.style.display = (mainMethod === 'QRIS') ? 'block' : 'none';
-    transferWrapper.style.display = (mainMethod === 'Transfer') ? 'block' : 'none';
+    recalculateCartTotals();
 }
 
 // ==========================================================================
-// SISTEM FINALISASI TRANSAKSI & CHECKOUT GANDA
+// 4. MULTI-INPUT CALCULATOR (ANGKA MANUAL vs KODE VOUCHER)
 // ==========================================================================
-let pendingTransactionData = null; // Menyimpan data sementara jika menunggu modal QRIS selesai
+function recalculateCartTotals() {
+    let subtotal = activeCart.reduce((sum, item) => sum + item.price, 0);
+    document.getElementById('txt-subtotal-val').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
 
-function processCheckout(outputType) {
-    const customerName = document.getElementById('customer-name').value.trim();
-    const customerEmail = document.getElementById('customer-email').value.trim();
+    let diskonRaw = document.getElementById('kasir-input-diskon').value.trim();
+    let voucherRaw = document.getElementById('kasir-input-voucher').value.trim();
+
+    let nilaiDiskon = 0;
+    let nilaiVoucher = 0;
+
+    // Logika Diskon Multi-input
+    if (diskonRaw !== '' && diskonRaw !== '0') {
+        let match = sysDatabase.vouchers.find(v => v.code.toUpperCase() === diskonRaw.toUpperCase() && v.type === 'Diskon');
+        if (match) {
+            nilaiDiskon = match.nominal;
+        } else {
+            nilaiDiskon = parseInt(diskonRaw) || 0; // Jika angka murni
+        }
+    }
+
+    // Logika Voucher Multi-input
+    if (voucherRaw !== '' && voucherRaw !== '0') {
+        let match = sysDatabase.vouchers.find(v => v.code.toUpperCase() === voucherRaw.toUpperCase() && v.type === 'Voucher');
+        if (match) {
+            nilaiVoucher = match.nominal;
+        } else {
+            nilaiVoucher = parseInt(voucherRaw) || 0; // Jika angka murni
+        }
+    }
+
+    let grandTotal = subtotal - nilaiDiskon - nilaiVoucher;
+    if (grandTotal < 0) grandTotal = 0;
+
+    document.getElementById('txt-grand-total-display').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    calculateCashReturn();
+    return { subtotal, diskon: nilaiDiskon, voucher: nilaiVoucher, total: grandTotal };
+}
+
+// ==========================================================================
+// 5. PERCABANGAN METODE BAYAR & REKENING DINAMIS
+// ==========================================================================
+function handlePaymentDropdownBranching() {
+    const method = document.getElementById('kasir-select-paymethod').value;
+    document.getElementById('wrapper-sub-cash').style.display = (method === 'Cash') ? 'block' : 'none';
+    document.getElementById('wrapper-sub-qris').style.display = (method === 'QRIS') ? 'block' : 'none';
+    document.getElementById('wrapper-sub-transfer').style.display = (method === 'Transfer') ? 'block' : 'none';
     
-    if (cart.length === 0) return alert('Keranjang belanja masih kosong!');
-    if (!customerName) return alert('Nama Pelanggan Wajib diisi!');
+    if (method === 'Transfer') {
+        populateTransferDropdown();
+    }
+}
 
-    const financial = calculateCartTotal();
-    const mainMethod = document.getElementById('main-payment-method').value;
-    let detailMetode = mainMethod;
+function calculateCashReturn() {
+    const financials = recalculateCartTotals();
+    const uangBayar = parseInt(document.getElementById('kasir-cash-input-uang').value) || 0;
+    let kembalian = uangBayar - financials.total;
+    if (kembalian < 0) kembalian = 0;
+    document.getElementById('cash-return-info').innerText = 'Kembalian: Rp ' + kembalian.toLocaleString('id-ID');
+}
 
-    if (mainMethod === 'QRIS') {
-        detailMetode = `QRIS ${document.getElementById('sub-qris-vendor').value}`;
-    } else if (mainMethod === 'Transfer') {
-        detailMetode = `TF ${document.getElementById('sub-transfer-target').value}`;
+function populateTransferDropdown() {
+    const select = document.getElementById('sub-target-transfer');
+    select.innerHTML = '';
+    if (sysDatabase.rekening.length === 0) {
+        select.innerHTML = '<option value="">Belum ada data bank</option>';
+        document.getElementById('live-rekening-info-box').innerText = 'Silakan isi rekening di panel owner.';
+        return;
+    }
+    sysDatabase.rekening.forEach((rek, index) => {
+        select.innerHTML += `<option value="${index}">${rek.bank}</option>`;
+    });
+    updateLiveRekeningInfo();
+}
+
+function updateLiveRekeningInfo() {
+    const idx = document.getElementById('sub-target-transfer').value;
+    if (idx !== "" && sysDatabase.rekening[idx]) {
+        document.getElementById('live-rekening-info-box').innerText = "Info Rekening: " + sysDatabase.rekening[idx].nomor;
+    }
+}
+
+// ==========================================================================
+// 6. SEARCH LIVE LOYALTY & REGISTER MEMBER
+// ==========================================================================
+function executeLiveSearchMember() {
+    const query = document.getElementById('kasir-search-member').value.trim().toUpperCase();
+    const infoBox = document.getElementById('kasir-member-status-box');
+    
+    if(query === "") {
+        infoBox.innerText = '';
+        activeMemberObj = null;
+        return;
     }
 
-    // Jika compliment, paksa total jadi 0 rupiah
-    let finalTotal = financial.total;
-    let statusTransaksi = 'Success';
-    if (outputType === 'Compliment') {
-        finalTotal = 0;
-        statusTransaksi = 'Compliment';
-        detailMetode = 'Compliment Gratis';
+    activeMemberObj = sysDatabase.members.find(m => m.name.toUpperCase() === query || m.wa === query);
+    
+    if (activeMemberObj) {
+        infoBox.innerText = `🌟 MEMBER FOUND: ${activeMemberObj.name} | Poin Anda: ${activeMemberObj.poin}`;
+        infoBox.style.color = "#2d5a27";
+    } else {
+        infoBox.innerText = "Pelanggan Umum (Belum terdaftar Member)";
+        infoBox.style.color = "#ff9500";
+    }
+}
+
+function registerFastMemberFromKasir() {
+    const nama = document.getElementById('kasir-search-member').value.trim();
+    const wa = document.getElementById('kasir-fast-wa').value.trim();
+
+    if(!nama || !wa) return alert('Input Nama Pelanggan dan No WA untuk pendaftaran cepat!');
+    
+    let exists = sysDatabase.members.some(m => m.wa === wa);
+    if(exists) return alert('Nomor WhatsApp ini sudah terdaftar!');
+
+    sysDatabase.members.push({ name: nama, wa: wa, poin: 0 });
+    saveToStorage();
+    alert(`Member ${nama} Sukses Didaftarkan!`);
+    document.getElementById('kasir-fast-wa').value = '';
+    executeLiveSearchMember();
+    renderMemberTable();
+}
+
+// ==========================================================================
+// 7. FINALISASI TRANSAKSI & CETAK NOTA KERTAS THERMAL
+// ==========================================================================
+function finalizeTransactionReceipt(mode) {
+    if (activeCart.length === 0) return alert('Pilih produk terlebih dahulu!');
+    
+    const financials = recalculateCartTotals();
+    const method = document.getElementById('kasir-select-paymethod').value;
+    
+    // Logika Akumulasi Kelipatan Poin: 1 item = 1 Poin
+    let poinTambahan = activeCart.length;
+
+    if (activeMemberObj) {
+        let index = sysDatabase.members.findIndex(m => m.wa === activeMemberObj.wa);
+        if(index !== -1) {
+            sysDatabase.members[index].poin += poinTambahan;
+        }
     }
 
-    // Formasi data struktural log transaksi
-    const trx = {
-        id: 'PC-' + Date.now(),
+    const trxId = 'TRX-' + Date.now();
+    const newTransaction = {
+        id: trxId,
         timestamp: new Date().toISOString(),
-        customerName: customerName,
-        customerEmail: customerEmail,
-        items: cart.map(i => i.name).join(', '),
-        subtotal: financial.subtotal,
-        diskon: financial.diskon,
-        voucher: financial.voucher,
-        total: finalTotal,
-        paymentMethod: detailMetode,
-        status: statusTransaksi
+        customer: activeMemberObj ? activeMemberObj.name : document.getElementById('kasir-search-member').value || 'Umum',
+        items: activeCart.map(i => i.name).join(', '),
+        itemCount: activeCart.length,
+        total: financials.total,
+        payment: method,
+        status: 'Sukses'
     };
 
-    if (mainMethod === 'QRIS' && outputType !== 'Compliment') {
-        // Tampilkan Pop Up QRIS sesuai blueprint sebelum menyimpan data
-        pendingTransactionData = { trx, outputType };
-        document.getElementById('qris-modal-title').textContent = `PEMBAYARAN via ${detailMetode.toUpperCase()}`;
-        document.getElementById('qris-modal-overlay').style.display = 'flex';
+    sysDatabase.transactions.push(newTransaction);
+    saveToStorage();
+
+    if (mode === 'Print') {
+        buildThermalReceiptHTML(newTransaction, financials);
+        window.print();
     } else {
-        executeSaveAndOutput(trx, outputType);
-    }
-}
-
-function closeQrisModalAndFinalize() {
-    document.getElementById('qris-modal-overlay').style.display = 'none';
-    if (pendingTransactionData) {
-        executeSaveAndOutput(pendingTransactionData.trx, pendingTransactionData.outputType);
-        pendingTransactionData = null;
-    }
-}
-
-function executeSaveAndOutput(transactionObj, outputType) {
-    // Simpan ke database localstorage
-    transactionDatabase.push(transactionObj);
-    localStorage.setItem('pakchill_pos_db', JSON.stringify(transactionDatabase));
-
-    // Eksekusi Output Struk Ganda Sesuai Blueprint
-    if (outputType === 'Email' && transactionObj.customerEmail) {
-        triggerMailtoReceipt(transactionObj);
-    } else if (outputType === 'Print') {
-        triggerThermalHardwarePrint(transactionObj);
+        alert('Transaksi Disimpan! Notifikasi email diarahkan ke API Gateway.');
     }
 
-    alert('Transaksi Berhasil Diproses!');
-    
-    // Reset Form Input
-    cart = [];
-    document.getElementById('customer-name').value = '';
-    document.getElementById('customer-email').value = '';
-    document.getElementById('input-diskon').value = 0;
-    document.getElementById('input-voucher').value = 0;
-    document.getElementById('main-payment-method').value = 'Cash';
-    handlePaymentBranching();
-    renderCart();
+    // Reset Kasir
+    activeCart = [];
+    document.getElementById('kasir-input-diskon').value = '0';
+    document.getElementById('kasir-input-voucher').value = '0';
+    document.getElementById('kasir-search-member').value = '';
+    document.getElementById('kasir-cash-input-uang').value = '';
+    document.getElementById('kasir-member-status-box').innerText = '';
+    renderCartUI();
+    if(activeRole === 'owner') renderOwnerDashboardMetrics();
 }
 
-// STRUK OPSI 1: KIRIM MELALUI EMAIL (AUTOMATION MAILTO)
-function triggerMailtoReceipt(t) {
-    const subject = encodeURIComponent(`Struk Belanja Digital Pakchill #${t.id}`);
-    const body = encodeURIComponent(
-        `Halo ${t.customerName},\n\n` +
-        `Terima kasih telah membeli produk kesehatan Pakchill.\n` +
-        `Berikut adalah detail nota transaksi digital Anda:\n\n` +
-        `ID NOTA : ${t.id}\n` +
-        `TANGGAL : ${new Date(t.timestamp).toLocaleString('id-ID')}\n` +
-        `PRODUK  : ${t.items}\n` +
-        `SUBTOTAL: Rp ${t.subtotal.toLocaleString('id-ID')}\n` +
-        `DISKON  : Rp ${t.diskon.toLocaleString('id-ID')}\n` +
-        `VOUCHER : Rp ${t.voucher.toLocaleString('id-ID')}\n` +
-        `-----------------------------------------\n` +
-        `TOTAL   : Rp ${t.total.toLocaleString('id-ID')}\n` +
-        `METODE  : ${t.paymentMethod}\n\n` +
-        `Salam Sehat, Pakchill Corp.`
-    );
-    window.location.href = `mailto:${t.customerEmail}?subject=${subject}&body=${body}`;
-}
-
-// STRUK OPSI 2: LANGSUNG CETAK LAYOUT MINI THERMAL PRINTER
-function triggerThermalHardwarePrint(t) {
-    const printArea = document.getElementById('thermal-receipt-area');
-    printArea.innerHTML = `
-        <div class="thermal-receipt">
-            <div class="thermal-header">
-                <h2>PAKCHILL POS</h2>
-                <p>Premium Packchoy & Nanas</p>
-                <p style="font-size:9px;">ID: ${t.id}</p>
-            </div>
-            <div class="thermal-divider"></div>
-            <p>Waktu: ${new Date(t.timestamp).toLocaleString('id-ID')}</p>
-            <p>Kasir: Active Staff</p>
-            <p>Pelanggan: ${t.customerName}</p>
-            <div class="thermal-divider"></div>
-            <p style="font-weight:bold;">Items:</p>
-            <p>${t.items}</p>
-            <div class="thermal-divider"></div>
-            <div class="thermal-row"><span>Subtotal:</span><span>Rp ${t.subtotal.toLocaleString('id-ID')}</span></div>
-            <div class="thermal-row"><span>Diskon:</span><span>Rp ${t.diskon.toLocaleString('id-ID')}</span></div>
-            <div class="thermal-row"><span>Voucher:</span><span>Rp ${t.voucher.toLocaleString('id-ID')}</span></div>
-            <div class="thermal-divider"></div>
-            <div class="thermal-total-row"><span>TOTAL:</span><span>Rp ${t.total.toLocaleString('id-ID')}</span></div>
-            <div class="thermal-row" style="font-size:9px; margin-top:4px;"><span>Metode:</span><span>${t.paymentMethod}</span></div>
-            <div class="thermal-divider"></div>
-            <div class="thermal-footer">
-                <p>Terima Kasih Atas Kunjungan Anda</p>
-                <p>~ Stay Healthy Stay Chill ~</p>
-            </div>
+function buildThermalReceiptHTML(trx, financial) {
+    const area = document.getElementById('thermal-receipt-output');
+    area.innerHTML = `
+        <div style="text-align:center; font-weight:bold;">PAKCHILL POS v5.0</div>
+        <div style="text-align:center; font-size:10px;">Enterprise Mobile Edition</div>
+        <hr style="border-top:1px dashed #000;">
+        <div>ID  : ${trx.id}</div>
+        <div>Tgl : ${new Date(trx.timestamp).toLocaleString('id-ID')}</div>
+        <div>Cust: ${trx.customer}</div>
+        <hr style="border-top:1px dashed #000;">
+        <div>Items: ${trx.items}</div>
+        <hr style="border-top:1px dashed #000;">
+        <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span>Rp ${financial.subtotal.toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>Potongan:</span><span>Rp ${(financial.diskon + financial.voucher).toLocaleString('id-ID')}</span></div>
+        <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL:</span><span>Rp ${trx.total.toLocaleString('id-ID')}</span></div>
+        <div>Bayar via: ${trx.payment}</div>
+        <hr style="border-top:1px dashed #000;">
+        <div style="text-align:center; font-size:10px; font-weight:bold;">
+            "Terima kasih telah mendukung petani local. Stay Healthy, Stay Chill bersama Pakchill. Poin Member Anda telah ditambahkan."
         </div>
     `;
-    window.print();
 }
 
 // ==========================================================================
-// MODUL MANAGEMENT OWNER & METRICS ANALISIS FINANSIAL
+// 8. ENGINE SUB-DASHBOARD MANAGEMENT CONTROL (OWNER AREA)
 // ==========================================================================
-function calculateOwnerMetrics() {
+function renderOwnerDashboardMetrics() {
+    // Saring transaksi aktif (Bukan Void)
+    const validTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses');
     const now = new Date();
+
     let omzetHari = 0, omzetMinggu = 0, omzetBulan = 0, omzetTahun = 0;
+    let monthlyDataArray = Array(12).fill(0);
 
-    // Persiapan array wadah untuk visualisasi Chart 12 bulan (Jan - Des)
-    let monthlyFinData = Array(12).fill(0);
-
-    transactionDatabase.forEach(t => {
-        if (t.status === 'Void') return; // Mengabaikan data void sesuai blueprint
-
+    validTrx.forEach(t => {
         const tDate = new Date(t.timestamp);
-        const timeDiff = now - tDate;
+        const diffTime = Math.abs(now - tDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Hitung filter Kalender Real-Time
-        // 1. Hari ini (Tanggal, Bulan, Tahun sama)
-        if (tDate.toDateString() === now.toDateString()) omzetHari += t.total;
-        // 2. 7 Hari Terakhir
-        if (timeDiff <= 7 * 24 * 60 * 60 * 1000) omzetMinggu += t.total;
-        // 3. Bulan ini
-        if (tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear()) omzetBulan += t.total;
-        // 4. Tahun Ini
-        if (tDate.getFullYear() === now.getFullYear()) omzetTahun += t.total;
-
-        // Distribusi grafik 1 tahun terakhir ke bulannya masing-masing
-        if (tDate.getFullYear() === now.getFullYear()) {
-            monthlyFinData[tDate.getMonth()] += t.total;
+        // Pengisian Data Chart Berdasarkan Bulan Kejadian
+        if(tDate.getFullYear() === now.getFullYear()) {
+            monthlyDataArray[tDate.getMonth()] += t.total;
         }
+
+        // Hitung Omzet Hari Ini
+        if(tDate.toDateString() === now.toDateString()) omzetHari += t.total;
+        // Hitung 7 Hari Terakhir
+        if(diffDays <= 7) omzetMinggu += t.total;
+        // Hitung Bulan Ini
+        if(tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear()) omzetBulan += t.total;
+        // Hitung Tahun Ini
+        if(tDate.getFullYear() === now.getFullYear()) omzetTahun += t.total;
     });
 
-    // Pasang angka ke kartu rekapitulasi owner
-    document.getElementById('txt-rekap-hari').textContent = `Rp ${omzetHari.toLocaleString('id-ID')}`;
-    document.getElementById('txt-rekap-minggu').textContent = `Rp ${omzetMinggu.toLocaleString('id-ID')}`;
-    document.getElementById('txt-rekap-bulan').textContent = `Rp ${omzetBulan.toLocaleString('id-ID')}`;
-    document.getElementById('txt-rekap-tahun').textContent = `Rp ${omzetTahun.toLocaleString('id-ID')}`;
+    // Pasang Nilai ke 4 Kartu Rekap Utama
+    document.getElementById('own-rekap-hari').innerText = 'Rp ' + omzetHari.toLocaleString('id-ID');
+    document.getElementById('own-rekap-minggu').innerText = 'Rp ' + omzetMinggu.toLocaleString('id-ID');
+    document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
+    document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
 
-    renderChartJS(monthlyFinData);
-}
-
-// INTEGRASI CHART.JS BULANAN OWNER
-function renderChartJS(chartDataPoints) {
-    const ctx = document.getElementById('owner-monthly-chart').getContext('2d');
-    
-    if (monthlyChartInstance) {
-        monthlyChartInstance.destroy(); // Hancurkan instance lama agar tidak bentrok rendering
-    }
-
-    monthlyChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agustus', 'Sep', 'Okt', 'Nov', 'Des'],
-            datasets: [{
-                label: 'Omzet Bersih Pakchill (Rp)',
-                data: chartDataPoints,
-                borderColor: '#2d5a27',
-                backgroundColor: 'rgba(71, 130, 65, 0.1)',
-                borderWidth: 3,
-                tension: 0.3,
-                fill: true,
-                pointBackgroundColor: '#1e3f1b'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)' } },
-                x: { grid: { display: false } }
+    // RENDERING GRAFIK TREN BULANAN (CHART.JS) DENGAN SAFE-GUARD TRY-CATCH
+    try {
+        if (chartInstanceGlobal) {
+            chartInstanceGlobal.destroy();
+        }
+        const ctx = document.getElementById('canvasTrenOwner').getContext('2d');
+        chartInstanceGlobal = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                datasets: [{
+                    label: 'Tren Omzet Bersih Pakchill (Rp)',
+                    data: monthlyDataArray,
+                    borderColor: '#2d5a27',
+                    backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } }
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error("Chart.js Error Guard Triggered:", error);
+    }
+
+    renderHistoryTable();
+    renderMemberTable();
 }
 
-// LOG DATA RIWAYAT DENGAN PEMBATASAN AKSES KETAT (KASIR VS OWNER)
-function renderHistoryTable() {
-    const tbody = document.getElementById('history-table-body');
+// MANAGEMENT FORM ACTIONS BY OWNER
+function saveNewMenuFromOwner() {
+    const name = document.getElementById('own-add-menu-name').value.trim().toUpperCase();
+    const price = parseInt(document.getElementById('own-add-menu-price').value);
+    if(!name || !price) return alert('Mohon isi nama dan harga produk!');
+    
+    sysDatabase.menu.push({ id: 'm-' + Date.now(), name, price });
+    saveToStorage();
+    alert('Menu Baru Berhasil Masuk Katalog!');
+    document.getElementById('own-add-menu-name').value = '';
+    document.getElementById('own-add-menu-price').value = '';
+    renderKatalogKasir();
+}
+
+function saveNewBundleFromOwner() {
+    const name = document.getElementById('own-add-bundle-name').value.trim();
+    const price = parseInt(document.getElementById('own-add-bundle-price').value);
+    if(!name || !price) return alert('Isi Nama Paket dan Harga Promo Paket!');
+
+    sysDatabase.bundles.push({ id: 'b-' + Date.now(), name, price });
+    saveToStorage();
+    alert('Paket Bundling Hemat Aktif!');
+    document.getElementById('own-add-bundle-name').value = '';
+    document.getElementById('own-add-bundle-price').value = '';
+    renderKatalogKasir();
+}
+
+function saveNewVoucherFromOwner() {
+    const code = document.getElementById('own-vch-code').value.trim().toUpperCase();
+    const nominal = parseInt(document.getElementById('own-vch-nominal').value);
+    const type = document.getElementById('own-vch-type').value;
+    if(!code || !nominal) return alert('Isi lengkap data pendaftaran diskon!');
+
+    sysDatabase.vouchers.push({ code, nominal, type });
+    saveToStorage();
+    alert(`Kode Unik Potongan ${code} Berhasil Didaftarkan.`);
+    document.getElementById('own-vch-code').value = '';
+    document.getElementById('own-vch-nominal').value = '';
+}
+
+function saveNewRekeningFromOwner() {
+    const bank = document.getElementById('own-rek-bankname').value;
+    const nomor = document.getElementById('own-rek-number').value.trim();
+    if(!nomor) return alert('Masukkan nomor rekening bank!');
+
+    sysDatabase.rekening.push({ bank, nomor });
+    saveToStorage();
+    alert('Data Rekening Berhasil Ditambahkan.');
+    document.getElementById('own-rek-number').value = '';
+}
+
+function registerNewMemberDirectly() {
+    const nama = prompt("Masukkan Nama Member Baru:");
+    const wa = prompt("Masukkan Nomor WhatsApp Aktif:");
+    if(!nama || !wa) return;
+    sysDatabase.members.push({ name: nama, wa: wa, poin: 0 });
+    saveToStorage();
+    renderMemberTable();
+}
+
+// ==========================================================================
+// 9. RENDER LOG TABLES & KRITIKAL VOID TRANSAKSI
+// ==========================================================================
+function renderMemberTable() {
+    const tbody = document.getElementById('own-render-member-rows');
     tbody.innerHTML = '';
-
-    const now = new Date();
-    const filterMonth = document.getElementById('filter-month-owner').value;
-
-    // Sorting kronologis: Transaksi terbaru ditaruh paling atas
-    const sortedData = [...transactionDatabase].reverse();
-
-    sortedData.forEach(t => {
-        const tDate = new Date(t.timestamp);
-        
-        // ATURAN BLUEPRINT: PEMBATASAN HAK KASIR VS OWNER
-        if (currentRole === 'kasir') {
-            const hoursDiff = (now - tDate) / (1000 * 60 * 60);
-            if (hoursDiff > 24) return; // Menyembunyikan riwayat berumur di atas 24 jam dari kasir
-        } else if (currentRole === 'owner') {
-            // Saringan Filter Dropdown Bulan Milik Owner (1 Tahun Terakhir)
-            if (tDate.getFullYear() !== now.getFullYear()) return; // Batasi 1 tahun kalender berjalan
-            if (filterMonth !== 'all' && tDate.getMonth().toString() !== filterMonth) return;
-        }
-
-        const isVoid = t.status === 'Void';
-        const row = document.createElement('tr');
-        
-        if (isVoid) row.className = 'row-void'; // Modifikasi baris pudar & tercoret jika status VOID
-
-        let badgeClass = 'success';
-        if (t.status === 'Void') badgeClass = 'void';
-        if (t.status === 'Compliment') badgeClass = 'compliment';
-
-        // Validasi tombol Void agar hanya aktif untuk Owner saja
-        const disableVoidBtn = (currentRole !== 'owner' || isVoid) ? 'disabled' : '';
-
-        row.innerHTML = `
-            <td><b>${t.id}</b></td>
-            <td>${tDate.toLocaleString('id-ID')}</td>
-            <td>${t.customerName}</td>
-            <td><span style="font-size:11px; color:#555;">${t.items}</span></td>
-            <td><small>${t.paymentMethod}</small></td>
-            <td><b>Rp ${t.total.toLocaleString('id-ID')}</b></td>
-            <td><span class="status-badge ${badgeClass}">${t.status}</span></td>
-            <td>
-                <button class="btn-void-action" ${disableVoidBtn} onclick="triggerVoidTransaction('${t.id}')">Void</button>
-            </td>
-        `;
-        tbody.appendChild(row);
+    sysDatabase.members.forEach(m => {
+        tbody.innerHTML += `<tr><td><b>${m.name}</b></td><td>${m.wa}</td><td style="color:#2d5a27; font-weight:bold;">${m.poin} Poin</td></tr>`;
     });
 }
 
-// SISTEM OTORITAS VOID DATA PENJUALAN
-function triggerVoidTransaction(trxId) {
-    if (confirm(`Apakah Anda yakin selaku Owner ingin mem-VOID Nota ${trxId}? Tindakan ini tidak bisa dibatalkan.`)) {
-        const index = transactionDatabase.findIndex(t => t.id === trxId);
-        if (index !== -1) {
-            transactionDatabase[index].status = 'Void';
-            transactionDatabase[index].total = 0; // Ubah nilai nominal ke 0 rupiah sesuai blueprint
-            localStorage.setItem('pakchill_pos_db', JSON.stringify(transactionDatabase));
-            
-            // Rekalkulasi total dashboard dan render ulang visual table secara real-time
-            calculateOwnerMetrics();
-            renderHistoryTable();
+function renderHistoryTable() {
+    const tbody = document.getElementById('own-render-history-rows');
+    tbody.innerHTML = '';
+    const filterMonth = document.getElementById('own-filter-month-select').value;
+    
+    // Pembatasan Log Kasir (Hanya 24 jam terakhir)
+    let filtered = sysDatabase.transactions;
+    if (activeRole === 'kasir') {
+        const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+        filtered = filtered.filter(t => Date.parse(t.timestamp) >= oneDayAgo);
+    } else if (activeRole === 'owner' && filterMonth !== 'all') {
+        filtered = filtered.filter(t => new Date(t.timestamp).getMonth() === parseInt(filterMonth));
+    }
+
+    filtered.forEach(t => {
+        let actionButton = '';
+        // Tombol VOID hanya ada di akun Owner Control
+        if (activeRole === 'owner' && t.status === 'Sukses') {
+            actionButton = `<button onclick="executeVoidTransaction('${t.id}')" style="background:#ff3b30; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer;">VOID</button>`;
+        } else if (t.status === 'Voided') {
+            actionButton = `<span style="color:#aaa; font-style:italic;">Dibatalkan</span>`;
         }
+
+        let styleRow = t.status === 'Voided' ? 'style="text-decoration: line-through; color: #aaa;"' : '';
+        
+        tbody.innerHTML += `
+            <tr ${styleRow}>
+                <td>${t.id}</td>
+                <td>${new Date(t.timestamp).toLocaleString('id-ID')}</td>
+                <td>${t.customer}</td>
+                <td style="font-weight:bold;">Rp ${t.total.toLocaleString('id-ID')}</td>
+                <td><mark style="background:#f0f0f0; padding:2px 6px; border-radius:4px;">${t.payment}</mark></td>
+                <td style="color:${t.status === 'Sukses' ? '#34c759' : '#ff3b30'}; font-weight:bold;">${t.status}</td>
+                <td>${actionButton}</td>
+            </tr>
+        `;
+    });
+}
+
+function executeVoidTransaction(id) {
+    if(!confirm(`Apakah Anda yakin ingin melakukan VOID pada transaksi ${id}? Tindakan ini akan merubah omzet secara real-time!`)) return;
+    
+    let idx = sysDatabase.transactions.findIndex(t => t.id === id);
+    if(idx !== -1) {
+        // Kurangi poin member kembali jika transaksi ini pakai member
+        let trxObj = sysDatabase.transactions[idx];
+        let memberMatch = sysDatabase.members.findIndex(m => m.name === trxObj.customer);
+        if(memberMatch !== -1) {
+            sysDatabase.members[memberMatch].poin -= trxObj.itemCount;
+            if(sysDatabase.members[memberMatch].poin < 0) sysDatabase.members[memberMatch].poin = 0;
+        }
+
+        // Coret Nilai & Ganti Status
+        sysDatabase.transactions[idx].total = 0;
+        sysDatabase.transactions[idx].status = 'Voided';
+        saveToStorage();
+        
+        // Refresh Dashboard Owner Secara Real-Time
+        renderOwnerDashboardMetrics();
     }
-}
-
-// MODUL TAMBAH MENU BARU SECARA REAL-TIME
-function handleAddNewProduct() {
-    const nameInput = document.getElementById('new-product-name').value.trim().toUpperCase();
-    const priceInput = parseInt(document.getElementById('new-product-price').value);
-
-    if (!nameInput || isNaN(priceInput) || priceInput <= 0) {
-        return alert('Harap isi Nama Menu dan Harga Jual Jelas & Valid!');
-    }
-
-    const itemBaru = {
-        id: 'p-' + Date.now(),
-        name: nameInput,
-        price: priceInput
-    };
-
-    menuDatabase.push(itemBaru);
-    localStorage.setItem('pakchill_menu_db', JSON.stringify(menuDatabase));
-    
-    alert(`Menu "${nameInput}" sukses dimasukkan ke katalog kasir!`);
-    
-    document.getElementById('new-product-name').value = '';
-    document.getElementById('new-product-price').value = '';
-    
-    renderKatalog(); // Update katalog seketika
-}
-
-// ==========================================================================
-// DOKUMEN OUTPUT UTK OWNER (PDF & EXCEL SPREADSHEET)
-// ==========================================================================
-
-// OUTPUT AKHIR 1: CETAK LAPORAN BERBENTUK PDF (HTML2PDF PUSTAKA)
-function exportOwnerReportPDF() {
-    const activeHistoryTable = document.getElementById('history-table-body');
-    if (activeHistoryTable.children.length === 0) return alert('Tidak ada data transaksi untuk dicetak pada bulan ini!');
-
-    // Kloning container log data visual untuk dicetak rapi secara terisolasi
-    const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.color = '#000000';
-    element.innerHTML = `
-        <h1 style="text-align:center; color:#2d5a27;">LAPORAN PENJUALAN RESMI PAKCHILL</h1>
-        <p style="text-align:center;">Arsip Cetak Dokumen Finansial Owner • Tanggal: ${new Date().toLocaleString('id-ID')}</p>
-        <hr style="border: 1px dashed #000; margin: 20px 0;">
-        <table border="1" cellpadding="8" style="width:100%; border-collapse:collapse; font-size:12px;">
-            <thead>
-                <tr style="background-color:#f2f2f7;">
-                    <th>ID Nota</th><th>Waktu</th><th>Pelanggan</th><th>Items</th><th>Metode</th><th>Total Bersih</th><th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${Array.from(activeHistoryTable.rows).map(row => `
-                    <tr style="${row.classList.contains('row-void') ? 'background-color:#ffe5e5; text-decoration:line-through;' : ''}">
-                        <td>${row.cells[0].innerText}</td>
-                        <td>${row.cells[1].innerText}</td>
-                        <td>${row.cells[2].innerText}</td>
-                        <td>${row.cells[3].innerText}</td>
-                        <td>${row.cells[4].innerText}</td>
-                        <td>${row.cells[5].innerText}</td>
-                        <td>${row.cells[6].innerText}</td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
-
-    const opt = {
-        margin:       10,
-        filename:     `Laporan_Owner_Pakchill_${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-    };
-
-    html2pdf().set(opt).from(element).save();
-}
-
-// OUTPUT AKHIR 2: EXPORT TRANSAKSI LANGSUNG JADI EXCEL (SHEETJS PUSTAKA)
-function exportOwnerReportExcel() {
-    if (transactionDatabase.length === 0) return alert('Database transaksi kosong, tidak ada data untuk diexport!');
-
-    // Transformasi data mentah ke baris kolom spreadsheet bersih
-    const excelRows = transactionDatabase.map(t => ({
-        'ID Nota': t.id,
-        'Waktu Transaksi': new Date(t.timestamp).toLocaleString('id-ID'),
-        'Nama Pelanggan': t.customerName,
-        'Email Pelanggan': t.customerEmail || '-',
-        'Daftar Produk Pesanan': t.items,
-        'Subtotal Gross': t.subtotal,
-        'Potongan Diskon': t.diskon,
-        'Potongan Voucher': t.voucher,
-        'Net Total Omzet': t.total,
-        'Metode Pembayaran': t.paymentMethod,
-        'Status Nota': t.status
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(excelRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Log POS Transaksi");
-
-    // Unduh berkas berekstensi .xlsx secara instan
-    XLSX.writeFile(workbook, `Rekap_TutupBuku_Pakchill_${Date.now()}.xlsx`);
 }
