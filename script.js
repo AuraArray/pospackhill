@@ -2,7 +2,7 @@
 // 1. ENGINE DATABASE CORE (MANDIRI & REAL-TIME LOCALSTORAGE)
 // ==========================================================================
 let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v5.2')) || {
-    menu: [], // Katalog bersih kosong agar diisi manual via Owner
+    menu: [], 
     bundles: [],
     vouchers: [
         { code: 'PAKCHILLSEHAT', nominal: 5000, type: 'Voucher' }
@@ -41,7 +41,10 @@ function saveToStorage() {
 // ==========================================================================
 function executeAuthentication() {
     const pinInput = document.getElementById('sys-pin-access');
-    if (!pinInput) return;
+    if (!pinInput) {
+        alert("Elemen PIN input tidak ditemukan di HTML!");
+        return;
+    }
     const pin = pinInput.value.trim();
     
     if (pin === '123') {
@@ -64,7 +67,6 @@ function executeAuthentication() {
         if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid'; 
         if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'block';
         unlockInterface();
-        renderOwnerDashboardMetrics();
     } else {
         alert('PIN Otentikasi Salah! Akses Sistem Terkunci.');
     }
@@ -76,13 +78,26 @@ function unlockInterface() {
     if (document.getElementById('sys-pin-access')) document.getElementById('sys-pin-access').value = '';
     if (document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
-    // Sinkronisasi render interface utama secara aman
-    try { renderKatalogKasir(); } catch(e) { console.error(e); }
-    try { renderCartUI(); } catch(e) { console.error(e); }
-    try { renderHistoryTable(); } catch(e) { console.error(e); }
-    try { renderMemberTable(); } catch(e) { console.error(e); }
-    try { populateTransferDropdown(); } catch(e) { console.error(e); }
-    try { calculateLiveClosingDashboard(); } catch(e) { console.error(e); }
+    // Eksekusi Render dengan Proteksi Error (Supaya jika satu error, yang lain tidak macet)
+    safeExecute(renderKatalogKasir, "Render Katalog");
+    safeExecute(renderCartUI, "Render Cart");
+    safeExecute(renderHistoryTable, "Render Histori");
+    safeExecute(renderMemberTable, "Render Member");
+    safeExecute(populateTransferDropdown, "Populate Transfer Dropdown");
+    safeExecute(calculateLiveClosingDashboard, "Calculate Closing");
+    
+    if (activeRole === 'owner') {
+        safeExecute(renderOwnerDashboardMetrics, "Render Owner Metrics");
+    }
+}
+
+// Fungsi pembungkus aman agar tidak memutus aliran logika JS jika ada kegagalan komponen visual
+function safeExecute(fn, label) {
+    try {
+        fn();
+    } catch (e) {
+        console.warn(`[Safe-Guard] Gagal mengeksekusi ${label}:`, e.message);
+    }
 }
 
 function triggerSystemLogout() {
@@ -94,7 +109,7 @@ function triggerSystemLogout() {
 }
 
 // ==========================================================================
-// 3. CATALOG & CART ENGINE (MENDUKUNG JENIS COMPLIMENTARY)
+// 3. CATALOG & CART ENGINE
 // ==========================================================================
 function renderKatalogKasir() {
     const target = document.getElementById('katalog-render-target');
@@ -102,7 +117,7 @@ function renderKatalogKasir() {
     target.innerHTML = '';
 
     if (sysDatabase.menu.length === 0 && sysDatabase.bundles.length === 0) {
-        target.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777; padding:20px; font-style:italic;">Katalog kosong. Silakan masuk sebagai Owner untuk menambah menu/komplimenter secara manual.</p>';
+        target.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777; padding:20px; font-style:italic;">Katalog kosong. Masuk sebagai Owner (PIN: 000) untuk menambah menu / produk komplimenter.</p>';
         return;
     }
 
@@ -213,7 +228,7 @@ function handlePaymentDropdownBranching() {
     if (document.getElementById('wrapper-sub-qris')) document.getElementById('wrapper-sub-qris').style.display = (method === 'QRIS') ? 'block' : 'none';
     if (document.getElementById('wrapper-sub-transfer')) document.getElementById('wrapper-sub-transfer').style.display = (method === 'Transfer') ? 'block' : 'none';
     
-    if (method === 'Transfer') populateTransferDropdown();
+    if (method === 'Transfer') safeExecute(populateTransferDropdown, "Dinamis Dropdown Bank");
     calculateCashReturn();
 }
 
@@ -250,7 +265,7 @@ function executeLiveSearchMember() {
     activeMemberObj = sysDatabase.members.find(m => m.name.toUpperCase() === query || m.wa === query);
     
     if (activeMemberObj) {
-        infoBox.innerText = `🌟 MEMBER TERKUNCI: ${activeMemberObj.name} | WA: ${activeMemberObj.wa} | Poin: ${activeMemberObj.poin}`;
+        infoBox.innerText = `🌟 MEMBER: ${activeMemberObj.name} | WA: ${activeMemberObj.wa} | Poin: ${activeMemberObj.poin}`;
         infoBox.style.color = "#2d5a27";
     } else {
         infoBox.innerText = "Status: Pelanggan Umum";
@@ -281,7 +296,7 @@ function registerFastMemberFromKasir() {
     waInput.value = '';
     
     executeLiveSearchMember();
-    try { renderMemberTable(); } catch(e){}
+    safeExecute(renderMemberTable, "Refresh Tabel Member");
 }
 
 // ==========================================================================
@@ -387,7 +402,7 @@ function finalizeTransactionReceipt(mode) {
         alert(`Transaksi Sukses Terbaca! Nomor Order: ${currentOrderNo}`);
     }
 
-    // Reset Workspace
+    // Reset Workspace Kasir
     activeCart = [];
     activeMemberObj = null;
     if (document.getElementById('kasir-input-diskon')) document.getElementById('kasir-input-diskon').value = '0';
@@ -398,10 +413,10 @@ function finalizeTransactionReceipt(mode) {
     if (document.getElementById('cash-return-info')) document.getElementById('cash-return-info').innerText = 'Kembalian: Rp 0';
     if (document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
-    try { renderCartUI(); } catch(e){}
-    try { calculateLiveClosingDashboard(); } catch(e){}
-    try { renderMemberTable(); } catch(e){}
-    if (activeRole === 'owner') { try { renderOwnerDashboardMetrics(); } catch(e){} }
+    safeExecute(renderCartUI, "Reset Cart");
+    safeExecute(calculateLiveClosingDashboard, "Recalculate Closing");
+    safeExecute(renderMemberTable, "Refresh Member Table");
+    if (activeRole === 'owner') { safeExecute(renderOwnerDashboardMetrics, "Refresh Dashboard Owner"); }
 }
 
 function buildThermalReceiptHTML(trx, financial) {
@@ -434,14 +449,16 @@ function buildThermalReceiptHTML(trx, financial) {
 function exportKasirReportPDF() {
     const element = document.getElementById('closing-report-pdf-area');
     if (!element) return;
+    if(typeof html2pdf === 'undefined') return alert('Library PDF belum termuat sempurna.');
     html2pdf().set({ margin: 10, filename: `Kasir-Closing-${todayStr}.pdf` }).from(element).save();
 }
 
 function exportKasirReportExcel() {
     const activeTodayTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses' && new Date(t.timestamp).toDateString() === todayStr);
     let rows = activeTodayTrx.map(t => ({ "Order": t.orderNumber, "Pelanggan": t.customer, "Item": t.items, "Total": t.total }));
+    if(typeof XLSX === 'undefined') return alert('Library Excel belum termuat sempurna.');
     const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
+    const wb = XLSX.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Closing");
     XLSX.writeFile(wb, `Kasir-Excel-${todayStr}.xlsx`);
 }
@@ -449,19 +466,21 @@ function exportKasirReportExcel() {
 function exportOwnerReportPDF() {
     const element = document.getElementById('table-owner-transactions-log');
     if (!element) return;
+    if(typeof html2pdf === 'undefined') return alert('Library PDF belum termuat sempurna.');
     html2pdf().set({ margin: 5, filename: `Owner-MasterLog.pdf` }).from(element).save();
 }
 
 function exportOwnerReportExcel() {
     let rows = sysDatabase.transactions.map(t => ({ "Order": t.orderNumber, "Nota": t.id, "Pelanggan": t.customer, "Total": t.total, "Status": t.status }));
+    if(typeof XLSX === 'undefined') return alert('Library Excel belum termuat sempurna.');
     const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
+    const wb = XLSX.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Master Log");
     XLSX.writeFile(wb, "Master-Owner-Log.xlsx");
 }
 
 // ==========================================================================
-// 8. SUITE MANAGEMENT METRICS OWNER (INTEGRASI 4 KARTU & GRAFIK)
+// 8. SUITE MANAGEMENT METRICS OWNER (INTEGRASI KARTU & GRAFIK AMAN)
 // ==========================================================================
 function renderOwnerDashboardMetrics() {
     const validTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses');
@@ -484,29 +503,34 @@ function renderOwnerDashboardMetrics() {
     if (document.getElementById('own-rekap-bulan')) document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
     if (document.getElementById('own-rekap-tahun')) document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
 
+    // PROTEKSI GRAFIK: Jika Chart.js gagal / terblokir, sistem manajemen data utama owner tidak boleh mati!
     try {
-        if (chartInstanceGlobal) chartInstanceGlobal.destroy();
-        const canvasEl = document.getElementById('canvasTrenOwner');
-        if (canvasEl) {
-            chartInstanceGlobal = new Chart(canvasEl.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
-                    datasets: [{ label: 'Omzet Bersih (Rp)', data: monthlyDataArray, borderColor: '#2d5a27', tension: 0.3, fill: true }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+        if (typeof Chart !== 'undefined') {
+            if (chartInstanceGlobal) chartInstanceGlobal.destroy();
+            const canvasEl = document.getElementById('canvasTrenOwner');
+            if (canvasEl) {
+                chartInstanceGlobal = new Chart(canvasEl.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        datasets: [{ label: 'Omzet Bersih (Rp)', data: monthlyDataArray, borderColor: '#2d5a27', tension: 0.3, fill: true }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
         }
-    } catch (e) { console.warn(e.message); }
+    } catch (e) { 
+        console.warn("Chart.js rendering blocked or failed:", e.message); 
+    }
 
-    try { renderHistoryTable(); } catch(e){}
-    try { renderMemberTable(); } catch(e){}
-    try { renderMenuManagementTable(); } catch(e){}
-    try { renderRekeningManagementTable(); } catch(e){}
+    safeExecute(renderHistoryTable, "Histori Owner");
+    safeExecute(renderMemberTable, "Member Owner");
+    safeExecute(renderMenuManagementTable, "Menu Owner");
+    safeExecute(renderRekeningManagementTable, "Rekening Owner");
 }
 
 // ==========================================================================
-// 9. DINAMIS TRANSFER REKENING (2 FORM MANAGEMENT)
+// 9. DINAMIS TRANSFER REKENING
 // ==========================================================================
 function populateTransferDropdown() {
     const select = document.getElementById('sub-target-transfer');
@@ -545,8 +569,8 @@ function saveNewRekeningFromOwner() {
     alert('Akun Pembayaran Baru Berhasil Terdaftar!');
     document.getElementById('own-rek-number').value = '';
     document.getElementById('own-rek-holder').value = '';
-    renderRekeningManagementTable();
-    populateTransferDropdown();
+    safeExecute(renderRekeningManagementTable, "Refresh Rekening");
+    safeExecute(populateTransferDropdown, "Refresh Dropdown Transfer");
 }
 
 function renderRekeningManagementTable() {
@@ -611,8 +635,8 @@ function saveNewMenuFromOwner() {
     alert('Menu Berhasil Didaftarkan!');
     document.getElementById('own-add-menu-name').value = '';
     document.getElementById('own-add-menu-price').value = '';
-    renderKatalogKasir();
-    renderMenuManagementTable();
+    safeExecute(renderKatalogKasir, "Sync Katalog");
+    safeExecute(renderMenuManagementTable, "Sync Table");
 }
 
 function saveNewBundleFromOwner() {
@@ -625,10 +649,9 @@ function saveNewBundleFromOwner() {
     alert('Paket Bundling Hemat Aktif!');
     document.getElementById('own-add-bundle-name').value = '';
     document.getElementById('own-add-bundle-price').value = '';
-    renderKatalogKasir();
+    safeExecute(renderKatalogKasir, "Sync Paket");
 }
 
-// Menampilkan data menu & komplementer di tabel Owner
 function renderMenuManagementTable() {
     const tbody = document.getElementById('own-render-menu-rows');
     if (!tbody) return;
@@ -658,39 +681,6 @@ function executeDeleteMenu(index) {
     renderKatalogKasir();
 }
 
-function executeEditMenu(index) {
-    let target = sysDatabase.menu[index];
-    let newName = prompt("Ubah Nama Menu:", target.name);
-    if (newName === null) return;
-    
-    let newPrice = target.price;
-    if (target.type !== 'Complimentary') {
-        let inputPrice = prompt("Ubah Harga Jual:", target.price);
-        if (inputPrice === null) return;
-        newPrice = parseInt(inputPrice) || 0;
-    }
-
-    if (newName.trim() === "") return alert("Nama tidak boleh kosong!");
-    sysDatabase.menu[index].name = newName.trim().toUpperCase();
-    sysDatabase.menu[index].price = newPrice;
-    
-    saveToStorage();
-    renderMenuManagementTable();
-    renderKatalogKasir();
-}
-
-function saveNewVoucherFromOwner() {
-    const code = document.getElementById('own-vch-code').value.trim().toUpperCase();
-    const nominal = parseInt(document.getElementById('own-vch-nominal').value);
-    const type = document.getElementById('own-vch-type').value;
-    if (!code || !nominal) return alert('Isi lengkap data diskon!');
-    sysDatabase.vouchers.push({ code, nominal, type });
-    saveToStorage();
-    alert(`Kode ${code} Berhasil Didaftarkan.`);
-    document.getElementById('own-vch-code').value = '';
-    document.getElementById('own-vch-nominal').value = '';
-}
-
 // ==========================================================================
 // 11. MEMBERSHIP CONTROL ACTIONS
 // ==========================================================================
@@ -712,25 +702,6 @@ function renderMemberTable() {
                 </td>
             </tr>`;
     });
-}
-
-function executeDeleteMember(index, name) {
-    if (!confirm(`Hapus member "${name}"?`)) return;
-    sysDatabase.members.splice(index, 1);
-    saveToStorage();
-    renderMemberTable();
-}
-
-function executeEditMember(index) {
-    let m = sysDatabase.members[index];
-    let n = prompt("Ubah Nama:", m.name); if (n === null) return;
-    let w = prompt("Ubah WA:", m.wa); if (w === null) return;
-    let p = prompt("Ubah Poin:", m.poin); if (p === null) return;
-
-    if (n.trim() === "" || w.trim() === "") return alert("Gagal Simpan!");
-    sysDatabase.members[index] = { name: n.trim().toUpperCase(), wa: w.trim(), poin: parseInt(p) || 0 };
-    saveToStorage();
-    renderMemberTable();
 }
 
 // ==========================================================================
@@ -787,7 +758,55 @@ function executeVoidTransaction(id) {
         sysDatabase.transactions[idx].total = 0;
         sysDatabase.transactions[idx].status = 'Voided';
         saveToStorage();
-        renderOwnerDashboardMetrics();
-        calculateLiveClosingDashboard();
+        safeExecute(renderOwnerDashboardMetrics, "Reload Metrics");
+        safeExecute(calculateLiveClosingDashboard, "Reload Closing");
     }
+}
+
+function executeEditMenu(index) {
+    let target = sysDatabase.menu[index];
+    let newName = prompt("Ubah Nama Menu:", target.name);
+    if (newName === null) return;
+    let newPrice = target.price;
+    if (target.type !== 'Complimentary') {
+        let inputPrice = prompt("Ubah Harga Jual:", target.price);
+        if (inputPrice === null) return;
+        newPrice = parseInt(inputPrice) || 0;
+    }
+    if (newName.trim() === "") return alert("Nama tidak boleh kosong!");
+    sysDatabase.menu[index].name = newName.trim().toUpperCase();
+    sysDatabase.menu[index].price = newPrice;
+    saveToStorage();
+    renderMenuManagementTable();
+    renderKatalogKasir();
+}
+
+function saveNewVoucherFromOwner() {
+    const code = document.getElementById('own-vch-code').value.trim().toUpperCase();
+    const nominal = parseInt(document.getElementById('own-vch-nominal').value);
+    const type = document.getElementById('own-vch-type').value;
+    if (!code || !nominal) return alert('Isi lengkap data diskon!');
+    sysDatabase.vouchers.push({ code, nominal, type });
+    saveToStorage();
+    alert(`Kode ${code} Berhasil Didaftarkan.`);
+    document.getElementById('own-vch-code').value = '';
+    document.getElementById('own-vch-nominal').value = '';
+}
+
+function executeDeleteMember(index, name) {
+    if (!confirm(`Hapus member "${name}"?`)) return;
+    sysDatabase.members.splice(index, 1);
+    saveToStorage();
+    renderMemberTable();
+}
+
+function executeEditMember(index) {
+    let m = sysDatabase.members[index];
+    let n = prompt("Ubah Nama:", m.name); if (n === null) return;
+    let w = prompt("Ubah WA:", m.wa); if (w === null) return;
+    let p = prompt("Ubah Poin:", m.poin); if (p === null) return;
+    if (n.trim() === "" || w.trim() === "") return alert("Gagal Simpan!");
+    sysDatabase.members[index] = { name: n.trim().toUpperCase(), wa: w.trim(), poin: parseInt(p) || 0 };
+    saveToStorage();
+    renderMemberTable();
 }
