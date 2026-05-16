@@ -93,6 +93,12 @@ nav {
     align-items: start;
 }
 
+.katalog-container-flex {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .ios-panel-card {
     background: var(--pakchill-light-bg);
     backdrop-filter: var(--ios-blur);
@@ -113,16 +119,16 @@ nav {
 /* INTERFASE ATURAN ADAPTIF LAYAR SMARTPHONE (HP PORTRAIT) */
 @media (max-width: 850px) {
     .kasir-operational-grid {
-        grid-template-columns: 1fr; /* Menumpuk Ke bawah */
+        grid-template-columns: 1fr;
     }
-    .katalog-section-card {
-        order: 1; /* Katalog Di Atas */
+    .katalog-container-flex {
+        order: 1;
     }
     .checkout-section-card {
-        order: 2; /* Keranjang pindah ke bawah jempol kasir */
+        order: 2;
     }
     .products-adaptive-grid {
-        grid-template-columns: repeat(2, 1fr) !important; /* WAJIB OTO 2 KOLOM */
+        grid-template-columns: repeat(2, 1fr) !important;
     }
     .main-welcome-title {
         font-size: 20px;
