@@ -37,65 +37,53 @@ function saveToStorage() {
 }
 
 // ==========================================================================
-// 2. OTENTIKASI SISTEM AMAN & WARNA IDENTITAS (KASIR: 123 | OWNER: 000)
+// 2. FUNGSI LOGIN & OTENTIKASI (STRUKTUR ASLI AWAL ANDA)
 // ==========================================================================
 function executeAuthentication() {
+    // Kembali menggunakan ID asli bawaan HTML awal Anda tanpa modifikasi nama variabel
     const pinInput = document.getElementById('sys-pin-access');
-    if (!pinInput) {
-        alert("Elemen PIN input tidak ditemukan di HTML!");
-        return;
-    }
+    if (!pinInput) return;
+    
     const pin = pinInput.value.trim();
     
     if (pin === '123') {
         activeRole = 'kasir';
-        const roleBadge = document.getElementById('badge-status-role');
-        if (roleBadge) {
-            roleBadge.innerText = 'Staff Kasir';
-            roleBadge.style.background = '#2d5a27'; // Warna Hijau Gelap Pakchill
-        }
-        if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid';
-        if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'none';
         unlockInterface();
     } else if (pin === '000') {
         activeRole = 'owner';
-        const roleBadge = document.getElementById('badge-status-role');
-        if (roleBadge) {
-            roleBadge.innerText = 'Owner Control';
-            roleBadge.style.background = '#1b3d16'; // Hijau Tua Premium
-        }
-        if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid'; 
-        if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'block';
         unlockInterface();
     } else {
-        alert('PIN Otentikasi Salah! Akses Sistem Terkunci.');
+        alert('PIN Otentikasi Salah!');
     }
 }
 
 function unlockInterface() {
+    // Menampilkan layar utama sesuai sistem awal Anda
     if (document.getElementById('login-screen-overlay')) document.getElementById('login-screen-overlay').style.display = 'none';
     if (document.getElementById('main-app-layer')) document.getElementById('main-app-layer').style.display = 'block';
+    
+    // Membuka segmentasi visual asli bawaan CSS awal Anda
+    if (activeRole === 'kasir') {
+        if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid';
+        if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'none';
+    } else if (activeRole === 'owner') {
+        if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid'; 
+        if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'block';
+    }
+
     if (document.getElementById('sys-pin-access')) document.getElementById('sys-pin-access').value = '';
     if (document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
-    // Eksekusi Render Aman (Satu fungsi eror tidak akan membuat tombol lain macet)
-    safeExecute(renderKatalogKasir, "Render Katalog");
-    safeExecute(renderCartUI, "Render Cart");
-    safeExecute(renderHistoryTable, "Render Histori");
-    safeExecute(renderMemberTable, "Render Member");
-    safeExecute(populateTransferDropdown, "Populate Transfer Dropdown");
-    safeExecute(calculateLiveClosingDashboard, "Calculate Closing");
+    // Jalankan semua render bawaan awal
+    renderKatalogKasir();
+    renderCartUI();
+    renderHistoryTable();
+    renderMemberTable();
+    populateTransferDropdown();
+    calculateLiveClosingDashboard();
     
     if (activeRole === 'owner') {
-        safeExecute(renderOwnerDashboardMetrics, "Render Owner Metrics");
-    }
-}
-
-function safeExecute(fn, label) {
-    try {
-        fn();
-    } catch (e) {
-        console.warn(`[Safe-Guard] Gagal mengeksekusi ${label}:`, e.message);
+        renderOwnerDashboardMetrics();
     }
 }
 
@@ -108,7 +96,7 @@ function triggerSystemLogout() {
 }
 
 // ==========================================================================
-// 3. CATALOG & CART ENGINE (MENGGUNAKAN VARIABEL WARNA ASLI)
+// 3. CATALOG & CART ENGINE (KLOP DENGAN CLASS CSS AWAL)
 // ==========================================================================
 function renderKatalogKasir() {
     const target = document.getElementById('katalog-render-target');
@@ -116,31 +104,28 @@ function renderKatalogKasir() {
     target.innerHTML = '';
 
     if (sysDatabase.menu.length === 0 && sysDatabase.bundles.length === 0) {
-        target.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#555; padding:20px; font-style:italic;">Katalog kosong. Masuk sebagai Owner untuk menambah menu baru.</p>';
+        target.innerHTML = '<p style="grid-column:1/-1; text-align:center; font-style:italic; color:#666;">Katalog kosong.</p>';
         return;
     }
 
+    // Merender menggunakan susunan struktur div asli agar dibaca CSS awal Anda
     sysDatabase.menu.forEach(item => {
         const isComp = item.type === 'Complimentary';
-        const displayPrice = isComp ? 'FREE / BONUS' : `Rp ${item.price.toLocaleString('id-ID')}`;
-        // Gunakan badge dengan warna tema hijau pakchill asli
-        const tagBadge = isComp ? '<span class="badge-complimentary-tag" style="background:#5856d6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; position:absolute; top:5px; left:5px;">Complimentary</span>' : '';
+        const displayPrice = isComp ? 'FREE' : `Rp ${item.price.toLocaleString('id-ID')}`;
         
         target.innerHTML += `
-            <div class="product-item-card" onclick="pushItemToCart('${item.name}', ${item.price})" style="position:relative; cursor:pointer;">
-                ${tagBadge}
-                <div style="font-weight:900; font-size:15px; color:var(--pakchill-green-dark, #2d5a27); margin-top:${isComp?'18px':'0'};">${item.name}</div>
-                <div style="color:var(--pakchill-green-soft, #417537); font-weight:700; margin-top:5px;">${displayPrice}</div>
+            <div class="product-item-card" onclick="pushItemToCart('${item.name}', ${item.price})">
+                <div class="product-name">${item.name}</div>
+                <div class="product-price">${displayPrice}</div>
             </div>
         `;
     });
 
     sysDatabase.bundles.forEach(bundle => {
         target.innerHTML += `
-            <div class="product-item-card" onclick="pushItemToCart('${bundle.name}', ${bundle.price})" style="position:relative; cursor:pointer;">
-                <span class="badge-bundling-tag" style="background:#ff9500; color:white; padding:2px 6px; border-radius:4px; font-size:10px; position:absolute; top:5px; left:5px;">Paket</span>
-                <div style="font-weight:900; font-size:14px; color:#ff9500; margin-top:18px;">${bundle.name}</div>
-                <div style="color:var(--pakchill-green-soft, #417537); font-weight:700; margin-top:5px;">Rp ${bundle.price.toLocaleString('id-ID')}</div>
+            <div class="product-item-card bundle-card" onclick="pushItemToCart('${bundle.name}', ${bundle.price})">
+                <div class="product-name">${bundle.name}</div>
+                <div class="product-price">Rp ${bundle.price.toLocaleString('id-ID')}</div>
             </div>
         `;
     });
@@ -162,20 +147,19 @@ function renderCartUI() {
     container.innerHTML = '';
     
     if (activeCart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#666; font-size:13px; padding:20px;">Keranjang belanja kosong.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#999; padding:10px;">Keranjang kosong.</p>';
         if (document.getElementById('txt-subtotal-val')) document.getElementById('txt-subtotal-val').innerText = 'Rp 0';
         if (document.getElementById('txt-grand-total-display')) document.getElementById('txt-grand-total-display').innerText = 'Rp 0';
         return;
     }
 
     activeCart.forEach(item => {
-        const costStr = item.price === 0 ? 'FREE' : `Rp ${item.price.toLocaleString('id-ID')}`;
         container.innerHTML += `
-            <div class="cart-item-row" style="display:flex; justify-content:between; align-items:center; margin-bottom:8px;">
-                <div style="width: 45%; font-weight:bold; font-size:13px;">${item.name}</div>
-                <div style="width: 35%; text-align: right; font-size:13px; color:#111;">${costStr}</div>
-                <div style="width: 20%; text-align: right;">
-                    <button onclick="removeItemFromCart(${item.uid})" style="width:auto; margin:0; padding:3px 8px; background:#ff3b30; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:11px;">✕</button>
+            <div class="cart-item-row">
+                <span>${item.name}</span>
+                <div>
+                    <span>Rp ${item.price.toLocaleString('id-ID')}</span>
+                    <button onclick="removeItemFromCart(${item.uid})" class="btn-remove-cart">✕</button>
                 </div>
             </div>
         `;
@@ -228,7 +212,7 @@ function handlePaymentDropdownBranching() {
     if (document.getElementById('wrapper-sub-qris')) document.getElementById('wrapper-sub-qris').style.display = (method === 'QRIS') ? 'block' : 'none';
     if (document.getElementById('wrapper-sub-transfer')) document.getElementById('wrapper-sub-transfer').style.display = (method === 'Transfer') ? 'block' : 'none';
     
-    if (method === 'Transfer') safeExecute(populateTransferDropdown, "Dinamis Dropdown Bank");
+    if (method === 'Transfer') populateTransferDropdown();
     calculateCashReturn();
 }
 
@@ -247,7 +231,7 @@ function calculateCashReturn() {
 }
 
 // ==========================================================================
-// 5. MEMBERSHIP & LOYALTY SEARCH ENGINE
+// 5. MEMBERSHIP LIVE SEARCH
 // ==========================================================================
 function executeLiveSearchMember() {
     const searchInput = document.getElementById('kasir-search-member');
@@ -265,11 +249,9 @@ function executeLiveSearchMember() {
     activeMemberObj = sysDatabase.members.find(m => m.name.toUpperCase() === query || m.wa === query);
     
     if (activeMemberObj) {
-        infoBox.innerText = `🌟 MEMBER: ${activeMemberObj.name} | WA: ${activeMemberObj.wa} | Poin: ${activeMemberObj.poin}`;
-        infoBox.style.color = "var(--pakchill-green-dark, #2d5a27)";
+        infoBox.innerText = `🌟 MEMBER: ${activeMemberObj.name} | Poin: ${activeMemberObj.poin}`;
     } else {
         infoBox.innerText = "Status: Pelanggan Umum";
-        infoBox.style.color = "#ff9500";
     }
 }
 
@@ -281,26 +263,25 @@ function registerFastMemberFromKasir() {
     const name = nameInput.value.trim();
     const wa = waInput.value.trim();
 
-    if (!name || !wa) return alert('Mohon isi Nama dan No WA Member Baru!');
+    if (!name || !wa) return alert('Mohon isi Nama dan No WA!');
     
     let exists = sysDatabase.members.some(m => m.wa === wa);
-    if (exists) return alert('Nomor WhatsApp ini sudah terdaftar!');
+    if (exists) return alert('Nomor WA sudah terdaftar!');
 
-    const newMember = { name: name.toUpperCase(), wa: wa, poin: 0 };
-    sysDatabase.members.push(newMember);
+    sysDatabase.members.push({ name: name.toUpperCase(), wa: wa, poin: 0 });
     saveToStorage();
     
-    alert(`Sukses Mendaftarkan Member: ${name.toUpperCase()}`);
+    alert(`Sukses daftar member: ${name.toUpperCase()}`);
     if (document.getElementById('kasir-search-member')) document.getElementById('kasir-search-member').value = wa;
     nameInput.value = '';
     waInput.value = '';
     
     executeLiveSearchMember();
-    safeExecute(renderMemberTable, "Refresh Tabel Member");
+    renderMemberTable();
 }
 
 // ==========================================================================
-// 6. CLOSING SHIFT & CHECKOUT TRANSAKSI KASIR
+// 6. CLOSING & FINALIZE TRANSAKSI
 // ==========================================================================
 function calculateLiveClosingDashboard() {
     const todayStr = new Date().toDateString();
@@ -328,18 +309,8 @@ function calculateLiveClosingDashboard() {
     menuListTarget.innerHTML = '';
     
     let mapKeys = Object.keys(menuMap);
-    if (mapKeys.length === 0) {
-        menuListTarget.innerHTML = '<span style="color:#aaa; font-style:italic;">Belum ada menu terjual hari ini.</span>';
-        return;
-    }
-
     mapKeys.forEach(mName => {
-        menuListTarget.innerHTML += `
-            <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.03); padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:4px;">
-                <span>🥗 ${mName}</span>
-                <span style="font-weight:bold; color:var(--pakchill-green-dark, #2d5a27);">${menuMap[mName]} Porsi</span>
-            </div>
-        `;
+        menuListTarget.innerHTML += `<div>🥗 ${mName}: ${menuMap[mName]} Porsi</div>`;
     });
 }
 
@@ -354,7 +325,7 @@ function finalizeTransactionReceipt(mode) {
         const cashInput = document.getElementById('kasir-cash-input-uang');
         const uangBayar = cashInput ? (parseInt(cashInput.value) || 0) : 0;
         if (uangBayar < financials.total) {
-            return alert(`Uang tunai kurang! Total tagihan: Rp ${financials.total.toLocaleString('id-ID')}`);
+            return alert('Uang tunai kurang!');
         }
     }
     
@@ -365,10 +336,6 @@ function finalizeTransactionReceipt(mode) {
         if (index !== -1) {
             sysDatabase.members[index].poin += activeCart.length; 
         }
-    } else {
-        const searchMmb = document.getElementById('kasir-search-member');
-        const manualName = searchMmb ? searchMmb.value.trim() : '';
-        if (manualName !== "") namaPelangganFix = manualName;
     }
 
     const currentOrderNo = sysDatabase.currentOrderSeq;
@@ -392,52 +359,40 @@ function finalizeTransactionReceipt(mode) {
     saveToStorage();
 
     if (mode === 'Print') {
-        try {
-            buildThermalReceiptHTML(newTransaction, financials);
-            window.print();
-        } catch(e) {
-            alert(`Berhasil disimpan, gagal cetak printer: ${e.message}`);
-        }
+        buildThermalReceiptHTML(newTransaction, financials);
+        window.print();
     } else {
-        alert(`Transaksi Sukses Terbaca! Nomor Order: ${currentOrderNo}`);
+        alert(`Transaksi Sukses! Order #: ${currentOrderNo}`);
     }
 
-    // Reset Workspace Kasir
+    // Reset Form Kasir
     activeCart = [];
     activeMemberObj = null;
-    if (document.getElementById('kasir-input-diskon')) document.getElementById('kasir-input-diskon').value = '0';
-    if (document.getElementById('kasir-input-voucher')) document.getElementById('kasir-input-voucher').value = '0';
     if (document.getElementById('kasir-search-member')) document.getElementById('kasir-search-member').value = '';
     if (document.getElementById('kasir-cash-input-uang')) document.getElementById('kasir-cash-input-uang').value = '';
     if (document.getElementById('kasir-member-status-box')) document.getElementById('kasir-member-status-box').innerText = '';
-    if (document.getElementById('cash-return-info')) document.getElementById('cash-return-info').innerText = 'Kembalian: Rp 0';
     if (document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
-    safeExecute(renderCartUI, "Reset Cart");
-    safeExecute(calculateLiveClosingDashboard, "Recalculate Closing");
-    safeExecute(renderMemberTable, "Refresh Member Table");
-    if (activeRole === 'owner') { safeExecute(renderOwnerDashboardMetrics, "Refresh Dashboard Owner"); }
+    renderCartUI();
+    calculateLiveClosingDashboard();
+    renderMemberTable();
+    if (activeRole === 'owner') { renderOwnerDashboardMetrics(); }
 }
 
 function buildThermalReceiptHTML(trx, financial) {
     const area = document.getElementById('thermal-receipt-output');
     if (!area) return;
     area.innerHTML = `
-        <div style="text-align:center; font-weight:bold;">PAKCHILL POS v5.2</div>
-        <div style="text-align:center; font-size:10px; font-weight:bold; color:white; background:black; padding:2px; margin:4px 0;">NO ORDER: ${trx.orderNumber}</div>
-        <hr style="border-top:1px dashed #000;">
-        <div>Nota  : ${trx.id}</div>
-        <div>Tgl   : ${new Date(trx.timestamp).toLocaleString('id-ID')}</div>
-        <div>Cust  : ${trx.customer}</div>
-        <hr style="border-top:1px dashed #000;">
-        <div>Menu  : ${trx.items}</div>
-        <hr style="border-top:1px dashed #000;">
-        <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span>Rp ${financial.subtotal.toLocaleString('id-ID')}</span></div>
-        <div style="display:flex; justify-content:space-between;"><span>Potongan:</span><span>Rp ${(financial.diskon + financial.voucher).toLocaleString('id-ID')}</span></div>
-        <div style="display:flex; justify-content:space-between; font-weight:bold;"><span>TOTAL:</span><span>Rp ${trx.total.toLocaleString('id-ID')}</span></div>
-        <div>Bayar : ${trx.payment}</div>
-        <hr style="border-top:1px dashed #000;">
-        <div style="text-align:center; font-size:9px; font-weight:bold; margin-top:5px;">
+        <div style="text-align:center; font-weight:bold;">PAKCHILL POS</div>
+        <div style="text-align:center;">Order #: ${trx.orderNumber}</div>
+        <hr>
+        <div>Nota: ${trx.id}</div>
+        <div>Cust: ${trx.customer}</div>
+        <hr>
+        <div>Menu: ${trx.items}</div>
+        <hr>
+        <div>Total: Rp ${trx.total.toLocaleString('id-ID')}</div>
+        <div style="text-align:center; font-size:10px; margin-top:10px;">
             "Terima kasih telah mendukung petani local. Stay Healthy, Stay Chill bersama Pakchill. Poin Member Anda telah ditambahkan."
         </div>
     `;
@@ -449,30 +404,28 @@ function buildThermalReceiptHTML(trx, financial) {
 function exportKasirReportPDF() {
     const element = document.getElementById('closing-report-pdf-area');
     if (!element) return;
-    if(typeof html2pdf === 'undefined') return alert('Library PDF belum termuat sempurna.');
-    html2pdf().set({ margin: 10, filename: `Kasir-Closing-${todayStr}.pdf` }).from(element).save();
+    if(typeof html2pdf === 'undefined') return alert('html2pdf belum siap.');
+    html2pdf().from(element).save();
 }
 
 function exportKasirReportExcel() {
     const activeTodayTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses' && new Date(t.timestamp).toDateString() === todayStr);
     let rows = activeTodayTrx.map(t => ({ "Order": t.orderNumber, "Pelanggan": t.customer, "Item": t.items, "Total": t.total }));
-    if(typeof XLSX === 'undefined') return alert('Library Excel belum termuat sempurna.');
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Closing");
-    XLSX.writeFile(wb, `Kasir-Excel-${todayStr}.xlsx`);
+    XLSX.writeFile(wb, `Kasir-Closing-${todayStr}.xlsx`);
 }
 
 function exportOwnerReportPDF() {
     const element = document.getElementById('table-owner-transactions-log');
     if (!element) return;
-    if(typeof html2pdf === 'undefined') return alert('Library PDF belum termuat sempurna.');
-    html2pdf().set({ margin: 5, filename: `Owner-MasterLog.pdf` }).from(element).save();
+    if(typeof html2pdf === 'undefined') return alert('html2pdf belum siap.');
+    html2pdf().from(element).save();
 }
 
 function exportOwnerReportExcel() {
     let rows = sysDatabase.transactions.map(t => ({ "Order": t.orderNumber, "Nota": t.id, "Pelanggan": t.customer, "Total": t.total, "Status": t.status }));
-    if(typeof XLSX === 'undefined') return alert('Library Excel belum termuat sempurna.');
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Master Log");
@@ -480,7 +433,7 @@ function exportOwnerReportExcel() {
 }
 
 // ==========================================================================
-// 8. SUITE MANAGEMENT METRICS OWNER
+// 8. OWNER PANEL DATA CENTER & PROTECTION GRAFIK
 // ==========================================================================
 function renderOwnerDashboardMetrics() {
     const validTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses');
@@ -503,7 +456,7 @@ function renderOwnerDashboardMetrics() {
     if (document.getElementById('own-rekap-bulan')) document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
     if (document.getElementById('own-rekap-tahun')) document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
 
-    // PROTEKSI GRAFIK AGAR TETAP AMAN & WARNA HIJAU PAKCHILL
+    // Proteksi Grafik: Jika script Chart.js belum ke-load, sistem manajemen owner tidak akan macet/eror
     try {
         if (typeof Chart !== 'undefined') {
             if (chartInstanceGlobal) chartInstanceGlobal.destroy();
@@ -520,17 +473,17 @@ function renderOwnerDashboardMetrics() {
             }
         }
     } catch (e) { 
-        console.warn("Chart.js rendering blocked or failed:", e.message); 
+        console.warn("Chart.js belum dimuat sempuna:", e.message); 
     }
 
-    safeExecute(renderHistoryTable, "Histori Owner");
-    safeExecute(renderMemberTable, "Member Owner");
-    safeExecute(renderMenuManagementTable, "Menu Owner");
-    safeExecute(renderRekeningManagementTable, "Rekening Owner");
+    renderHistoryTable();
+    renderMemberTable();
+    renderMenuManagementTable();
+    renderRekeningManagementTable();
 }
 
 // ==========================================================================
-// 9. DINAMIS TRANSFER REKENING
+// 9. REKENING & DINAMIS TRANSFER SYSTEM
 // ==========================================================================
 function populateTransferDropdown() {
     const select = document.getElementById('sub-target-transfer');
@@ -538,7 +491,6 @@ function populateTransferDropdown() {
     select.innerHTML = '';
     if (sysDatabase.rekening.length === 0) {
         select.innerHTML = '<option value="">Belum ada rekening aktif</option>';
-        if (document.getElementById('live-rekening-info-box')) document.getElementById('live-rekening-info-box').innerText = 'Silakan isi rekening di panel owner.';
         return;
     }
     sysDatabase.rekening.forEach((rek, index) => {
@@ -562,15 +514,15 @@ function saveNewRekeningFromOwner() {
     const bank = document.getElementById('own-rek-bankname').value;
     const nomor = document.getElementById('own-rek-number').value.trim();
     const holder = document.getElementById('own-rek-holder').value.trim();
-    if (!nomor || !holder) return alert('Lengkapi data: Nomor Rekening dan Atas Nama wajib diisi!');
+    if (!nomor || !holder) return alert('Data wajib diisi!');
 
     sysDatabase.rekening.push({ bank, nomor, holder });
     saveToStorage();
-    alert('Akun Pembayaran Baru Berhasil Terdaftar!');
+    alert('Akun Pembayaran Sukses Ditambahkan!');
     document.getElementById('own-rek-number').value = '';
     document.getElementById('own-rek-holder').value = '';
-    safeExecute(renderRekeningManagementTable, "Refresh Rekening");
-    safeExecute(populateTransferDropdown, "Refresh Dropdown Transfer");
+    renderRekeningManagementTable();
+    populateTransferDropdown();
 }
 
 function renderRekeningManagementTable() {
@@ -584,10 +536,8 @@ function renderRekeningManagementTable() {
                 <td>${rek.nomor}</td>
                 <td>${rek.holder}</td>
                 <td>
-                    <div style="display:flex; gap:4px;">
-                        <button onclick="executeEditRekening(${index})" style="background:#007aff; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Edit</button>
-                        <button onclick="executeDeleteRekening(${index})" style="background:#ff3b30; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Hapus</button>
-                    </div>
+                    <button onclick="executeEditRekening(${index})">Edit</button>
+                    <button onclick="executeDeleteRekening(${index})">Hapus</button>
                 </td>
             </tr>
         `;
@@ -604,13 +554,11 @@ function executeDeleteRekening(index) {
 
 function executeEditRekening(index) {
     let item = sysDatabase.rekening[index];
-    let newNo = prompt("Ubah Nomor Rekening / E-Wallet:", item.nomor);
+    let newNo = prompt("Ubah Nomor Rekening:", item.nomor);
     if (newNo === null) return;
-    let newHolder = prompt("Ubah Atas Nama (A/N):", item.holder);
+    let newHolder = prompt("Ubah Atas Nama:", item.holder);
     if (newHolder === null) return;
 
-    if (newNo.trim() === "" || newHolder.trim() === "") return alert("Data tidak boleh kosong!");
-    
     sysDatabase.rekening[index].nomor = newNo.trim();
     sysDatabase.rekening[index].holder = newHolder.trim().toUpperCase();
     saveToStorage();
@@ -619,7 +567,7 @@ function executeEditRekening(index) {
 }
 
 // ==========================================================================
-// 10. PRODUCT & COMPLIMENTARY MENU CRUD SYSTEM
+// 10. PRODUCT MANAGEMENT TABLE CRUD
 // ==========================================================================
 function saveNewMenuFromOwner() {
     const name = document.getElementById('own-add-menu-name').value.trim().toUpperCase();
@@ -628,28 +576,27 @@ function saveNewMenuFromOwner() {
 
     if (!name) return alert('Nama produk tidak boleh kosong!');
     if (type === 'Complimentary') price = 0; 
-    else if (isNaN(price) || price < 0) return alert('Masukkan harga reguler yang valid!');
 
     sysDatabase.menu.push({ id: 'm-' + Date.now(), name, price, type });
     saveToStorage();
     alert('Menu Berhasil Didaftarkan!');
     document.getElementById('own-add-menu-name').value = '';
     document.getElementById('own-add-menu-price').value = '';
-    safeExecute(renderKatalogKasir, "Sync Katalog");
-    safeExecute(renderMenuManagementTable, "Sync Table");
+    renderKatalogKasir();
+    renderMenuManagementTable();
 }
 
 function saveNewBundleFromOwner() {
     const name = document.getElementById('own-add-bundle-name').value.trim();
     const price = parseInt(document.getElementById('own-add-bundle-price').value);
-    if (!name || isNaN(price)) return alert('Lengkapi data paket bundling!');
+    if (!name || isNaN(price)) return alert('Lengkapi data bundling!');
 
     sysDatabase.bundles.push({ id: 'b-' + Date.now(), name, price });
     saveToStorage();
     alert('Paket Bundling Hemat Aktif!');
     document.getElementById('own-add-bundle-name').value = '';
     document.getElementById('own-add-bundle-price').value = '';
-    safeExecute(renderKatalogKasir, "Sync Paket");
+    renderKatalogKasir();
 }
 
 function renderMenuManagementTable() {
@@ -660,13 +607,11 @@ function renderMenuManagementTable() {
         tbody.innerHTML += `
             <tr>
                 <td><b>${item.name}</b></td>
-                <td>${item.price === 0 ? 'FREE' : 'Rp '+item.price.toLocaleString('id-ID')}</td>
-                <td><span style="color:${item.type==='Complimentary'?'#5856d6':'var(--pakchill-green-dark, green)'}; font-weight:bold;">${item.type}</span></td>
+                <td>Rp ${item.price.toLocaleString('id-ID')}</td>
+                <td>${item.type}</td>
                 <td>
-                    <div style="display:flex; gap:4px;">
-                        <button onclick="executeEditMenu(${index})" style="background:#007aff; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Edit</button>
-                        <button onclick="executeDeleteMenu(${index})" style="background:#ff3b30; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Hapus</button>
-                    </div>
+                    <button onclick="executeEditMenu(${index})">Edit</button>
+                    <button onclick="executeDeleteMenu(${index})">Hapus</button>
                 </td>
             </tr>
         `;
@@ -674,8 +619,25 @@ function renderMenuManagementTable() {
 }
 
 function executeDeleteMenu(index) {
-    if (!confirm('Hapus item ini dari database katalog?')) return;
+    if (!confirm('Hapus item ini?')) return;
     sysDatabase.menu.splice(index, 1);
+    saveToStorage();
+    renderMenuManagementTable();
+    renderKatalogKasir();
+}
+
+function executeEditMenu(index) {
+    let target = sysDatabase.menu[index];
+    let newName = prompt("Ubah Nama Menu:", target.name);
+    if (newName === null) return;
+    let newPrice = target.price;
+    if (target.type !== 'Complimentary') {
+        let inputPrice = prompt("Ubah Harga Jual:", target.price);
+        if (inputPrice === null) return;
+        newPrice = parseInt(inputPrice) || 0;
+    }
+    sysDatabase.menu[index].name = newName.trim().toUpperCase();
+    sysDatabase.menu[index].price = newPrice;
     saveToStorage();
     renderMenuManagementTable();
     renderKatalogKasir();
@@ -693,19 +655,35 @@ function renderMemberTable() {
             <tr>
                 <td><b>${m.name}</b></td>
                 <td>${m.wa}</td>
-                <td style="color:var(--pakchill-green-dark, #2d5a27); font-weight:bold;">${m.poin} Poin</td>
+                <td>${m.poin} Poin</td>
                 <td>
-                    <div style="display: flex; gap: 4px;">
-                        <button onclick="executeEditMember(${index})" style="background:#007aff; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Edit</button>
-                        <button onclick="executeDeleteMember(${index}, '${m.name}')" style="background:#ff3b30; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Hapus</button>
-                    </div>
+                    <button onclick="executeEditMember(${index})">Edit</button>
+                    <button onclick="executeDeleteMember(${index}, '${m.name}')">Hapus</button>
                 </td>
             </tr>`;
     });
 }
 
+function executeDeleteMember(index, name) {
+    if (!confirm(`Hapus member "${name}"?`)) return;
+    sysDatabase.members.splice(index, 1);
+    saveToStorage();
+    renderMemberTable();
+}
+
+function executeEditMember(index) {
+    let m = sysDatabase.members[index];
+    let n = prompt("Ubah Nama:", m.name); if (n === null) return;
+    let w = prompt("Ubah WA:", m.wa); if (w === null) return;
+    let p = prompt("Ubah Poin:", m.poin); if (p === null) return;
+    
+    sysDatabase.members[index] = { name: n.trim().toUpperCase(), wa: w.trim(), poin: parseInt(p) || 0 };
+    saveToStorage();
+    renderMemberTable();
+}
+
 // ==========================================================================
-// 12. LOG TRANSACTIONS & CORE VOID
+// 12. LOG HISTORI TRANSAKSI & CORE VOID
 // ==========================================================================
 function renderHistoryTable() {
     const tbody = document.getElementById('own-render-history-rows');
@@ -724,21 +702,19 @@ function renderHistoryTable() {
     filtered.forEach(t => {
         let actionButton = '';
         if (activeRole === 'owner' && t.status === 'Sukses') {
-            actionButton = `<button onclick="executeVoidTransaction('${t.id}')" style="background:#ff3b30; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer;">VOID</button>`;
-        } else if (t.status === 'Voided') {
-            actionButton = `<span style="color:#aaa; font-style:italic;">Dibatalkan</span>`;
+            actionButton = `<button onclick="executeVoidTransaction('${t.id}')">VOID</button>`;
         }
         let styleRow = t.status === 'Voided' ? 'style="text-decoration: line-through; color: #aaa;"' : '';
         
         tbody.innerHTML += `
             <tr ${styleRow}>
-                <td style="font-weight:bold; color:#ff9500;">#${t.orderNumber || '-'}</td>
+                <td>#${t.orderNumber || '-'}</td>
                 <td>${t.id}</td>
                 <td>${new Date(t.timestamp).toLocaleString('id-ID')}</td>
                 <td>${t.customer}</td>
-                <td style="font-weight:bold;">Rp ${t.total.toLocaleString('id-ID')}</td>
-                <td><mark style="background:#f0f0f0; padding:2px 6px; border-radius:4px;">${t.payment}</mark></td>
-                <td style="color:${t.status === 'Sukses' ? '#34c759' : '#ff3b30'}; font-weight:bold;">${t.status}</td>
+                <td>Rp ${t.total.toLocaleString('id-ID')}</td>
+                <td>${t.payment}</td>
+                <td>${t.status}</td>
                 <td>${actionButton}</td>
             </tr>
         `;
@@ -758,27 +734,9 @@ function executeVoidTransaction(id) {
         sysDatabase.transactions[idx].total = 0;
         sysDatabase.transactions[idx].status = 'Voided';
         saveToStorage();
-        safeExecute(renderOwnerDashboardMetrics, "Reload Metrics");
-        safeExecute(calculateLiveClosingDashboard, "Reload Closing");
+        renderOwnerDashboardMetrics();
+        calculateLiveClosingDashboard();
     }
-}
-
-function executeEditMenu(index) {
-    let target = sysDatabase.menu[index];
-    let newName = prompt("Ubah Nama Menu:", target.name);
-    if (newName === null) return;
-    let newPrice = target.price;
-    if (target.type !== 'Complimentary') {
-        let inputPrice = prompt("Ubah Harga Jual:", target.price);
-        if (inputPrice === null) return;
-        newPrice = parseInt(inputPrice) || 0;
-    }
-    if (newName.trim() === "") return alert("Nama tidak boleh kosong!");
-    sysDatabase.menu[index].name = newName.trim().toUpperCase();
-    sysDatabase.menu[index].price = newPrice;
-    saveToStorage();
-    renderMenuManagementTable();
-    renderKatalogKasir();
 }
 
 function saveNewVoucherFromOwner() {
@@ -791,22 +749,4 @@ function saveNewVoucherFromOwner() {
     alert(`Kode ${code} Berhasil Didaftarkan.`);
     document.getElementById('own-vch-code').value = '';
     document.getElementById('own-vch-nominal').value = '';
-}
-
-function executeDeleteMember(index, name) {
-    if (!confirm(`Hapus member "${name}"?`)) return;
-    sysDatabase.members.splice(index, 1);
-    saveToStorage();
-    renderMemberTable();
-}
-
-function executeEditMember(index) {
-    let m = sysDatabase.members[index];
-    let n = prompt("Ubah Nama:", m.name); if (n === null) return;
-    let w = prompt("Ubah WA:", m.wa); if (w === null) return;
-    let p = prompt("Ubah Poin:", m.poin); if (p === null) return;
-    if (n.trim() === "" || w.trim() === "") return alert("Gagal Simpan!");
-    sysDatabase.members[index] = { name: n.trim().toUpperCase(), wa: w.trim(), poin: parseInt(p) || 0 };
-    saveToStorage();
-    renderMemberTable();
 }
