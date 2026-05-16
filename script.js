@@ -1,7 +1,7 @@
 // ==========================================================================
 // 1. ENGINE DATABASE CORE (LOCALSTORAGE RECONCILIATION & AUTO-RESET ORDER #)
 // ==========================================================================
-let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v5.1')) || {
+let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v1.0')) || {
     menu: [
         { id: 'm1', name: 'PACHOY', price: 15000 },
         { id: 'm2', name: 'NANAS', price: 12000 }
