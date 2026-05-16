@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pakchill POS v5.2 - Premium Edition</title>
+    <title>Pakchill POS v5.2 - Premium Enterprise Edition</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -29,10 +29,10 @@
         <header class="main-header">
             <div class="header-left">
                 <h1>Selamat Datang di Pakchill POS</h1>
-                <p id="txt-live-order-number" class="order-seq-badge">Order #: --</p>
+                <p id="txt-live-order-number" class="order-seq-badge">Order #: 101</p>
             </div>
             <div class="header-right">
-                <span id="badge-status-role" class="role-badge">Role</span>
+                <span id="badge-status-role" class="role-badge">Staff Kasir</span>
                 <button onclick="triggerSystemLogout()" class="btn-logout">Keluar</button>
             </div>
         </header>
@@ -116,10 +116,10 @@
                     <div id="kasir-member-status-box" class="member-status-lbl"></div>
 
                     <div class="fast-member-box">
-                        <h4>Daftar Member Cepat</h4>
+                        <h4>Daftar Member Cepat (Fast Register)</h4>
                         <div class="fast-inputs">
                             <input type="text" id="kasir-fast-name" placeholder="Nama">
-                            <input type="text" id="kasir-fast-wa" placeholder="No WA (e.g. 0812)">
+                            <input type="text" id="kasir-fast-wa" placeholder="No WA">
                             <button onclick="registerFastMemberFromKasir()">+</button>
                         </div>
                     </div>
@@ -145,7 +145,7 @@
                         <p id="txt-closing-total-qty">0 Item</p>
                     </div>
                     <div class="metric-card card-white">
-                        <h4>Rincian Menu Populer</h4>
+                        <h4>Rincian Menu Populer Hari Ini</h4>
                         <div id="closing-menu-list-render" class="closing-menu-list">
                             </div>
                     </div>
@@ -191,7 +191,7 @@
                 <div class="crud-card">
                     <h3>Kelola Produk & Complimentary</h3>
                     <div class="crud-form">
-                        <input type="text" id="own-add-menu-name" placeholder="Nama Menu (e.g. PAKCHOY PINEAPPLE)">
+                        <input type="text" id="own-add-menu-name" placeholder="Nama Menu (Contoh: PAKCHOY PINEAPPLE)">
                         <input type="number" id="own-add-menu-price" placeholder="Harga Jual (Rp)">
                         <select id="own-add-menu-type">
                             <option value="Reguler">Menu Reguler</option>
@@ -200,7 +200,7 @@
                         <button onclick="saveNewMenuFromOwner()" class="btn-crud-submit">Daftarkan Menu</button>
                     </div>
                     <div class="crud-form bndl-margin">
-                        <input type="text" id="own-add-bundle-name" placeholder="Nama Paket Bundling">
+                        <input type="text" id="own-add-bundle-name" placeholder="Nama Paket Bundling Hemat">
                         <input type="number" id="own-add-bundle-price" placeholder="Harga Paket (Rp)">
                         <button onclick="saveNewBundleFromOwner()" class="btn-crud-submit btn-orange">Aktifkan Paket</button>
                     </div>
@@ -225,7 +225,7 @@
                             <option value="Dana">Dana</option>
                             <option value="ShopeePay">ShopeePay</option>
                         </select>
-                        <input type="text" id="own-rek-number" placeholder="Nomor Rekening / HP">
+                        <input type="text" id="own-rek-number" placeholder="Nomor Rekening / No HP">
                         <input type="text" id="own-rek-holder" placeholder="Atas Nama (A/N)">
                         <button onclick="saveNewRekeningFromOwner()" class="btn-crud-submit">Simpan Akun Pembayaran</button>
                     </div>
@@ -242,7 +242,7 @@
                 <div class="crud-card">
                     <h3>Sistem Voucher & Promosi</h3>
                     <div class="crud-form">
-                        <input type="text" id="own-vch-code" placeholder="KODE VOUCHER (e.g. SEHAT)">
+                        <input type="text" id="own-vch-code" placeholder="KODE PROMO (Contoh: SEHAT)">
                         <input type="number" id="own-vch-nominal" placeholder="Nominal Potongan (Rp)">
                         <select id="own-vch-type">
                             <option value="Diskon">Potongan Langsung Diskon</option>
@@ -257,7 +257,7 @@
                     <div class="table-scroll">
                         <table>
                             <thead>
-                                <tr><th>Nama Member</th><th>No WhatsApp</th><th>Akumulasi Poin</th><th>Aksi</th></tr>
+                                <tr><th>Nama Member</th><th>No WhatsApp</th><th>Poin Loyalty</th><th>Aksi</th></tr>
                             </thead>
                             <tbody id="own-render-member-rows"></tbody>
                         </table>
@@ -267,7 +267,7 @@
 
             <section id="table-owner-transactions-log" class="master-log-section">
                 <div class="section-title-flex">
-                    <h3>Master Log Audit Transaksi</h3>
+                    <h3>Master Log Audit Operasional Transaksi</h3>
                     <select id="own-filter-month-select" onchange="renderHistoryTable()">
                         <option value="all">Semua Bulan</option>
                         <option value="0">Januari</option><option value="1">Februari</option>
