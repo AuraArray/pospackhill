@@ -92,6 +92,7 @@ function triggerSystemLogout() {
 // ==========================================================================
 function renderKatalogKasir() {
     const target = document.getElementById('katalog-render-target');
+    if (!target) return;
     target.innerHTML = '';
 
     sysDatabase.menu.forEach(item => {
@@ -126,6 +127,7 @@ function removeItemFromCart(uid) {
 
 function renderCartUI() {
     const container = document.getElementById('cart-items-wrapper');
+    if (!container) return;
     container.innerHTML = '';
     
     if (activeCart.length === 0) {
@@ -151,10 +153,12 @@ function renderCartUI() {
 
 function recalculateCartTotals() {
     let subtotal = activeCart.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('txt-subtotal-val').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+    if(document.getElementById('txt-subtotal-val')) {
+        document.getElementById('txt-subtotal-val').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+    }
 
-    let diskonRaw = document.getElementById('kasir-input-diskon').value.trim();
-    let voucherRaw = document.getElementById('kasir-input-voucher').value.trim();
+    let diskonRaw = document.getElementById('kasir-input-diskon') ? document.getElementById('kasir-input-diskon').value.trim() : '0';
+    let voucherRaw = document.getElementById('kasir-input-voucher') ? document.getElementById('kasir-input-voucher').value.trim() : '0';
 
     let nilaiDiskon = 0;
     let nilaiVoucher = 0;
@@ -174,7 +178,9 @@ function recalculateCartTotals() {
     let grandTotal = subtotal - nilaiDiskon - nilaiVoucher;
     if (grandTotal < 0) grandTotal = 0;
 
-    document.getElementById('txt-grand-total-display').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    if(document.getElementById('txt-grand-total-display')) {
+        document.getElementById('txt-grand-total-display').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
+    }
     return { subtotal, diskon: nilaiDiskon, voucher: nilaiVoucher, total: grandTotal };
 }
 
@@ -199,32 +205,13 @@ function calculateCashReturn() {
     let kembalian = uangBayar - financials.total;
     if (kembalian < 0) kembalian = 0;
     
-    document.getElementById('cash-return-info').innerText = 'Kembalian: Rp ' + kembalian.toLocaleString('id-ID');
-}
-
-function populateTransferDropdown() {
-    const select = document.getElementById('sub-target-transfer');
-    select.innerHTML = '';
-    if (sysDatabase.rekening.length === 0) {
-        select.innerHTML = '<option value="">Belum ada data bank</option>';
-        document.getElementById('live-rekening-info-box').innerText = 'Silakan isi rekening di panel owner.';
-        return;
-    }
-    sysDatabase.rekening.forEach((rek, index) => {
-        select.innerHTML += `<option value="${index}">${rek.bank}</option>`;
-    });
-    updateLiveRekeningInfo();
-}
-
-function updateLiveRekeningInfo() {
-    const idx = document.getElementById('sub-target-transfer').value;
-    if (idx !== "" && sysDatabase.rekening[idx]) {
-        document.getElementById('live-rekening-info-box').innerText = "Info Rekening: " + sysDatabase.rekening[idx].nomor;
+    if(document.getElementById('cash-return-info')) {
+        document.getElementById('cash-return-info').innerText = 'Kembalian: Rp ' + kembalian.toLocaleString('id-ID');
     }
 }
 
 // ==========================================================================
-// 5. REVISI: LIVE SEARCH MEMBER & PENDAFTARAN 2 FORM DI KASIR
+// 5. LIVE SEARCH MEMBER & PENDAFTARAN 2 FORM DI KASIR
 // ==========================================================================
 function executeLiveSearchMember() {
     const query = document.getElementById('kasir-search-member').value.trim().toUpperCase();
@@ -236,7 +223,6 @@ function executeLiveSearchMember() {
         return;
     }
 
-    // Otomatis tarik data jika nomor WA atau Nama Member cocok (Mendukung pencarian dinamis)
     activeMemberObj = sysDatabase.members.find(m => m.name.toUpperCase() === query || m.wa === query);
     
     if (activeMemberObj) {
@@ -263,7 +249,6 @@ function registerFastMemberFromKasir() {
     
     alert(`Sukses! Member Baru Terdaftar:\nNama: ${name.toUpperCase()}\nWA: ${wa}`);
     
-    // Auto login/tarik langsung ke kolom pencarian kasir setelah sukses daftar
     document.getElementById('kasir-search-member').value = wa;
     document.getElementById('kasir-fast-name').value = '';
     document.getElementById('kasir-fast-wa').value = '';
@@ -294,10 +279,11 @@ function calculateLiveClosingDashboard() {
         }
     });
 
-    document.getElementById('txt-closing-total-omzet').innerText = 'Rp ' + totalUang.toLocaleString('id-ID');
-    document.getElementById('txt-closing-total-qty').innerText = totalQty + ' Item';
+    if(document.getElementById('txt-closing-total-omzet')) document.getElementById('txt-closing-total-omzet').innerText = 'Rp ' + totalUang.toLocaleString('id-ID');
+    if(document.getElementById('txt-closing-total-qty')) document.getElementById('txt-closing-total-qty').innerText = totalQty + ' Item';
 
     const menuListTarget = document.getElementById('closing-menu-list-render');
+    if (!menuListTarget) return;
     menuListTarget.innerHTML = '';
     
     let mapKeys = Object.keys(menuMap);
@@ -317,15 +303,17 @@ function calculateLiveClosingDashboard() {
 }
 
 // ==========================================================================
-// 7. FINALISASI PROSES TRANSAKSI & VALIDASI PEMBAYARAN TUNAI
+// 7. FIX PROSES TRANSAKSI & VALIDASI PEMBAYARAN KASIR
 // ==========================================================================
 function finalizeTransactionReceipt(mode) {
-    if (activeCart.length === 0) return alert('Pilih produk di katalog terlebih dahulu!');
+    if (activeCart.length === 0) {
+        return alert('Pilih produk di katalog terlebih dahulu! Keranjang masih kosong.');
+    }
     
     const financials = recalculateCartTotals();
     const method = document.getElementById('kasir-select-paymethod').value;
     
-    // Validasi Khusus Pembayaran Cash agar tidak macet/error
+    // Validasi Pembayaran Cash agar tidak macet
     if (method === 'Cash') {
         const uangBayar = parseInt(document.getElementById('kasir-cash-input-uang').value) || 0;
         if (uangBayar < financials.total) {
@@ -333,7 +321,7 @@ function finalizeTransactionReceipt(mode) {
         }
     }
     
-    // Tambah Poin jika status member aktif terpilih
+    // Validasi Poin Member
     let namaPelangganFix = 'Umum';
     if (activeMemberObj) {
         namaPelangganFix = activeMemberObj.name;
@@ -363,7 +351,7 @@ function finalizeTransactionReceipt(mode) {
     };
 
     sysDatabase.transactions.push(newTransaction);
-    sysDatabase.currentOrderSeq += 1; // Geser urutan order ke +1
+    sysDatabase.currentOrderSeq += 1; 
     saveToStorage();
 
     if (mode === 'Print') {
@@ -376,13 +364,13 @@ function finalizeTransactionReceipt(mode) {
     // Reset Workspace Kasir ke Kondisi Awal
     activeCart = [];
     activeMemberObj = null;
-    document.getElementById('kasir-input-diskon').value = '0';
-    document.getElementById('kasir-input-voucher').value = '0';
-    document.getElementById('kasir-search-member').value = '';
-    document.getElementById('kasir-cash-input-uang').value = '';
-    document.getElementById('kasir-member-status-box').innerText = '';
-    document.getElementById('cash-return-info').innerText = 'Kembalian: Rp 0';
-    document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
+    if(document.getElementById('kasir-input-diskon')) document.getElementById('kasir-input-diskon').value = '0';
+    if(document.getElementById('kasir-input-voucher')) document.getElementById('kasir-input-voucher').value = '0';
+    if(document.getElementById('kasir-search-member')) document.getElementById('kasir-search-member').value = '';
+    if(document.getElementById('kasir-cash-input-uang')) document.getElementById('kasir-cash-input-uang').value = '';
+    if(document.getElementById('kasir-member-status-box')) document.getElementById('kasir-member-status-box').innerText = '';
+    if(document.getElementById('cash-return-info')) document.getElementById('cash-return-info').innerText = 'Kembalian: Rp 0';
+    if(document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
     renderCartUI();
     calculateLiveClosingDashboard();
@@ -392,6 +380,7 @@ function finalizeTransactionReceipt(mode) {
 
 function buildThermalReceiptHTML(trx, financial) {
     const area = document.getElementById('thermal-receipt-output');
+    if (!area) return;
     area.innerHTML = `
         <div style="text-align:center; font-weight:bold;">PAKCHILL POS v5.2</div>
         <div style="text-align:center; font-size:10px; font-weight:bold; color:white; background:black; padding:2px; margin:4px 0;">NO ORDER: ${trx.orderNumber}</div>
@@ -504,10 +493,10 @@ function renderOwnerDashboardMetrics() {
         if(tDate.getFullYear() === now.getFullYear()) omzetTahun += t.total;
     });
 
-    document.getElementById('own-rekap-hari').innerText = 'Rp ' + omzetHari.toLocaleString('id-ID');
-    document.getElementById('own-rekap-minggu').innerText = 'Rp ' + omzetMinggu.toLocaleString('id-ID');
-    document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
-    document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
+    if(document.getElementById('own-rekap-hari')) document.getElementById('own-rekap-hari').innerText = 'Rp ' + omzetHari.toLocaleString('id-ID');
+    if(document.getElementById('own-rekap-minggu')) document.getElementById('own-rekap-minggu').innerText = 'Rp ' + omzetMinggu.toLocaleString('id-ID');
+    if(document.getElementById('own-rekap-bulan')) document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
+    if(document.getElementById('own-rekap-tahun')) document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
 
     try {
         if (chartInstanceGlobal) chartInstanceGlobal.destroy();
@@ -538,6 +527,28 @@ function renderOwnerDashboardMetrics() {
 
     renderHistoryTable();
     renderMemberTable();
+}
+
+function populateTransferDropdown() {
+    const select = document.getElementById('sub-target-transfer');
+    if(!select) return;
+    select.innerHTML = '';
+    if (sysDatabase.rekening.length === 0) {
+        select.innerHTML = '<option value="">Belum ada data bank</option>';
+        document.getElementById('live-rekening-info-box').innerText = 'Silakan isi rekening di panel owner.';
+        return;
+    }
+    sysDatabase.rekening.forEach((rek, index) => {
+        select.innerHTML += `<option value="${index}">${rek.bank}</option>`;
+    });
+    updateLiveRekeningInfo();
+}
+
+function updateLiveRekeningInfo() {
+    const idx = document.getElementById('sub-target-transfer').value;
+    if (idx !== "" && sysDatabase.rekening[idx]) {
+        document.getElementById('live-rekening-info-box').innerText = "Info Rekening: " + sysDatabase.rekening[idx].nomor;
+    }
 }
 
 function saveNewMenuFromOwner() {
@@ -591,10 +602,11 @@ function saveNewRekeningFromOwner() {
 }
 
 // ==========================================================================
-// 10. RENDER LOG TABLES & REVISI: FITUR HAPUS MEMBER DARI OWNER
+// 10. FIX DATA MANAGEMENT: FITUR HAPUS & EDIT DATA MEMBER
 // ==========================================================================
 function renderMemberTable() {
     const tbody = document.getElementById('own-render-member-rows');
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     sysDatabase.members.forEach((m, index) => {
@@ -603,7 +615,8 @@ function renderMemberTable() {
                 <td><b>${m.name}</b></td>
                 <td>${m.wa}</td>
                 <td style="color:#2d5a27; font-weight:bold;">${m.poin} Poin</td>
-                <td style="text-align:center;">
+                <td style="text-align:center; display: flex; gap: 5px; justify-content: center;">
+                    <button onclick="executeEditMember(${index})" style="background:#007aff; color:white; border:none; padding:4px 10px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer; width:auto; margin:0;">Edit</button>
                     <button onclick="executeDeleteMember(${index}, '${m.name}')" style="background:#ff3b30; color:white; border:none; padding:4px 10px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer; width:auto; margin:0;">Hapus</button>
                 </td>
             </tr>`;
@@ -616,10 +629,35 @@ function executeDeleteMember(index, name) {
     sysDatabase.members.splice(index, 1);
     saveToStorage();
     renderMemberTable();
+    alert('Member berhasil dihapus dari database.');
+}
+
+function executeEditMember(index) {
+    let member = sysDatabase.members[index];
+    let newName = prompt("Ubah Nama Member:", member.name);
+    let newWa = prompt("Ubah Nomor WhatsApp:", member.wa);
+    let newPoin = prompt("Ubah Poin Member:", member.poin);
+
+    if (newName === null || newWa === null || newPoin === null) return; // Batalkan jika klik cancel
+    
+    if (newName.trim() === "" || newWa.trim() === "") {
+        return alert("Nama dan No WA tidak boleh kosong!");
+    }
+
+    sysDatabase.members[index] = {
+        name: newName.trim().toUpperCase(),
+        wa: newWa.trim(),
+        poin: parseInt(newPoin) || 0
+    };
+
+    saveToStorage();
+    renderMemberTable();
+    alert('Data member berhasil diubah!');
 }
 
 function renderHistoryTable() {
     const tbody = document.getElementById('own-render-history-rows');
+    if (!tbody) return;
     tbody.innerHTML = '';
     const filterMonth = document.getElementById('own-filter-month-select').value;
     
