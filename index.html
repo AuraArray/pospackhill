@@ -3,150 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Kasir Pakchill - Digital POS</title>
-    
-    <!-- 1. PEMANGGILAN CSS (KULIT) -->
+    <title>Pakchill POS v3.1 - iOS Premium Edition</title>
+    <!-- Hubungkan ke stylesheet utama -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- 2. LIBRARY GRAFIK (OWNER DASHBOARD) -->
+    <!-- CONNETIVITAS CDN EKSTERNAL SESUAI BLUEPRINT -->
+    <!-- 1. Chart.js untuk Analisis Grafik Bulanan Owner -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 2. html2pdf.js untuk Ekspor Dokumen Laporan PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- 3. SheetJS untuk Ekspor Spreadsheet Excel (.xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
-    <!-- SECTION 1: LAYAR LOGIN -->
-    <section id="login-screen">
-        <div style="text-align: center;">
-            <h1 style="font-size: 3rem; margin-bottom: 0;">PAKCHILL</h1>
-            <p style="margin-bottom: 30px; color: var(--pakchill-yellow);">Pachoy & Nanas Segar</p>
-            
-            <input type="password" id="login-password" placeholder="Masukkan Password">
-            <br>
-            <button id="btn-login">MASUK KE SISTEM</button>
-            <p style="font-size: 0.7rem; margin-top: 20px; opacity: 0.7;">
-                Kasir: 123 | Owner: 000
-            </p>
-        </div>
-    </section>
+    <!-- ANIMASI LATAR BELAKANG FLUIDA (iOS 26 STYLE) -->
+    <div class="fluid-ambient-background"></div>
 
-    <!-- SECTION 2: AREA APLIKASI UTAMA (Akan muncul setelah login) -->
-    <main id="main-app" style="display:none;">
+    <!-- GERBANG UTAMA: LAYAR LOGIN AMAN (TANPA TEKS HINT/PIN) -->
+    <div id="login-screen" class="ios-fade-in">
+        <div class="login-card-premium">
+            <div class="brand-logo-animation"></div>
+            <h1>PAKCHILL POS</h1>
+            <p class="brand-version">Premium Point of Sale • v3.1</p>
+            <div class="secure-input-wrapper">
+                <input type="password" id="login-password" placeholder="Masukkan PIN Akses" autocomplete="off">
+            </div>
+            <button id="btn-login">Unlock System</button>
+        </div>
+    </div>
+
+    <!-- KONTROL UTAMA MULTI-USER (AKAN DI-DISPLAY VIA JS) -->
+    <div id="main-app" style="display: none;">
         
-        <!-- Navigasi Atas -->
-        <nav>
-            <h2 id="brand-name">PAKCHILL POS</h2>
-            <div id="nav-links">
-                <button id="nav-to-kasir">🛒 Terminal Kasir</button>
-                <!-- Menu Owner disembunyikan jika login sebagai kasir -->
-                <button id="nav-to-owner" style="display:none;">📊 Dashboard Owner</button>
-                <button id="btn-logout">Keluar</button>
+        <!-- HEADER & NAVIGASI PREMIUM -->
+        <nav class="ios-navbar">
+            <div class="nav-left">
+                <span class="logo-text">PAKCHILL</span>
+                <span id="badge-role" class="user-badge">Role</span>
+            </div>
+            <div class="nav-right">
+                <button id="nav-btn-kasir" class="nav-item active">🛒 Terminal Kasir</button>
+                <button id="nav-btn-owner" class="nav-item" style="display: none;">📊 Dashboard Owner</button>
+                <button id="btn-logout" class="nav-item-logout">Keluar</button>
             </div>
         </nav>
 
-        <!-- HALAMAN KASIR (ZONA TRANSAKSI) -->
-        <section id="page-kasir">
-            <!-- Kolom Kiri: Menu Produk -->
-            <div id="product-list">
-                <h3 style="margin-bottom: 15px; border-bottom: 2px solid var(--pakchill-green); padding-bottom: 5px;">Menu Minuman</h3>
-                <button id="add-pachoy">
-                    PACHOY SEGAR<br>
-                    <small>Rp 15.000</small>
-                </button>
-                <button id="add-nanas">
-                    NANAS MADU<br>
-                    <small>Rp 12.000</small>
-                </button>
-            </div>
+        <!-- CONTAINER HALAMAN (SLIDE & FADE TRANSITION) -->
+        <div class="workspace-container">
 
-            <!-- Kolom Kanan: Rincian & Pembayaran -->
-            <div id="order-details-container">
-                <div id="order-details">
-                    <h3 style="margin-bottom: 10px;">Keranjang Belanja</h3>
-                    <ul id="cart-list">
-                        <!-- Item muncul otomatis via JS -->
-                    </ul>
-                    <div style="border-top: 2px solid #eee; padding-top: 10px; margin-top: 10px;">
-                        <p style="display: flex; justify-content: space-between;">
-                            Subtotal: <span>Rp <span id="display-subtotal">0</span></span>
-                        </p>
+            <!-- ==================== TAB TERMINAL KASIR ==================== -->
+            <section id="page-kasir" class="page-view active-view">
+                <div class="kasir-grid-layout">
+                    
+                    <!-- PANEL KIRI: KATALOG MENU DINAMIS -->
+                    <div class="ios-panel panel-katalog">
+                        <div class="panel-header">
+                            <h2>Katalog Produk</h2>
+                            <p class="panel-subtitle">Pilih menu pesanan pelanggan</p>
+                        </div>
+                        <div id="katalog-container" class="products-flex-grid">
+                            <!-- Tombol produk di-render otomatis secara dinamis oleh JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- PANEL KANAN: DETAIL CHECKOUT & PEMBAYARAN MULTI-CABANG -->
+                    <div class="ios-panel panel-checkout">
+                        <div class="panel-header">
+                            <h2>Keranjang Belanja</h2>
+                        </div>
                         
-                        <!-- Input Diskon / Voucher -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px; color: blue;">
-                            <label for="input-discount">Diskon/Voucher:</label>
-                            <span>- Rp <input type="number" id="input-discount" value="0" style="width: 80px; text-align: right;"></span>
+                        <!-- TABEL DETAIL ITEM -->
+                        <div class="cart-table-wrapper">
+                            <table class="ios-table-cart">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Item</th>
+                                        <th>Harga Satuan</th>
+                                        <th style="width: 60px; text-align: center;">Hapus</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-table-body">
+                                    <!-- Diisi secara real-time via JS -->
+                                </tbody>
+                            </table>
                         </div>
 
-                        <h2 style="display: flex; justify-content: space-between; margin-top: 10px; color: var(--pakchill-green);">
-                            TOTAL: <span>Rp <span id="display-total">0</span></span>
-                        </h2>
+                        <!-- KALKULATOR FINANSIAL REAL-TIME -->
+                        <div class="pricing-summary-card">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span id="summary-subtotal">Rp 0</span>
+                            </div>
+                            <div class="summary-row field-input">
+                                <label for="input-diskon">Diskon Manual (Rp)</label>
+                                <input type="number" id="input-diskon" value="0" min="0">
+                            </div>
+                            <div class="summary-row field-input">
+                                <label for="input-voucher">Potongan Voucher (Rp)</label>
+                                <input type="number" id="input-voucher" value="0" min="0">
+                            </div>
+                            <div class="summary-row total-highlight">
+                                <span>TOTAL TAGIHAN</span>
+                                <span id="summary-total">Rp 0</span>
+                            </div>
+                        </div>
+
+                        <!-- FORM DATA PELANGGAN & METODE BAYAR DINAMIS -->
+                        <div class="checkout-form-group">
+                            <h3>Informasi & Pembayaran</h3>
+                            <input type="text" id="customer-name" placeholder="Nama Pelanggan (Wajib)">
+                            <input type="email" id="customer-email" placeholder="Email Pelanggan (Struk Digital)">
+                            
+                            <!-- Dropdown Utama Metode Pembayaran -->
+                            <label class="select-label">Metode Pembayaran Utama:</label>
+                            <select id="main-payment-method">
+                                <option value="Cash">Cash (Tunai)</option>
+                                <option value="QRIS">QRIS (Otomatis Tampil QR)</option>
+                                <option value="Transfer">Transfer E-Wallet / Bank</option>
+                            </select>
+
+                            <!-- PERCABANGAN LOGIKA METODE PEMBAYARAN (SUB-PILIHAN) -->
+                            <!-- Sub-Metode: QRIS -->
+                            <div id="sub-qris-wrapper" class="sub-method-card" style="display: none;">
+                                <label class="select-label">Pilih Vendor QRIS:</label>
+                                <select id="sub-qris-vendor">
+                                    <option value="Mandiri">QRIS Bank Mandiri</option>
+                                    <option value="ShopeePay">QRIS ShopeePay</option>
+                                </select>
+                            </div>
+
+                            <!-- Sub-Metode: Transfer -->
+                            <div id="sub-transfer-wrapper" class="sub-method-card" style="display: none;">
+                                <label class="select-label">Pilih Opsi Tujuan Transfer:</label>
+                                <select id="sub-transfer-target">
+                                    <optgroup label="Kategori E-Wallet">
+                                        <option value="GoPay">GoPay</option>
+                                        <option value="ShopeePay">ShopeePay</option>
+                                        <option value="Dana">Dana</option>
+                                    </optgroup>
+                                    <optgroup label="Kategori Bank Resmi">
+                                        <option value="BCA">Bank BCA</option>
+                                        <option value="Jago">Bank Jago</option>
+                                        <option value="Mandiri">Bank Mandiri</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- TOMBOL EKSEKUSI GANDA & SISTEM STRUK GANDA -->
+                            <div class="billing-action-area">
+                                <button id="btn-submit-compliment" class="ios-btn btn-secondary-compliment">🎁 Beri Compliment</button>
+                                <button id="btn-checkout-email" class="ios-btn btn-primary-email">📧 Proses & Kirim Email</button>
+                                <button id="btn-checkout-print" class="ios-btn btn-primary-print">🖨️ Proses & Langsung Cetak</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ==================== TAB DASHBOARD OWNER ==================== -->
+            <section id="page-owner" class="page-view" style="display: none;">
+                
+                <!-- MANAGEMENT TOP BAR: EXPORT & BACKUP GANDA -->
+                <div class="owner-top-actions-bar">
+                    <div class="management-title">
+                        <h2>Panel Kendali Owner</h2>
+                        <p>Rekap harian s/d tahunan & penambahan produk</p>
+                    </div>
+                    <div class="export-button-group">
+                        <button id="btn-export-pdf" class="btn-export pdf-theme">📄 Unduh Laporan (PDF)</button>
+                        <button id="btn-export-excel" class="btn-export excel-theme">📊 Export Laporan (.XLSX)</button>
                     </div>
                 </div>
 
-                <!-- Formulir Data Pelanggan -->
-                <div id="checkout-form" style="margin-top: 20px;">
-                    <h4 style="margin-bottom: 10px;">Data Pelanggan & Pembayaran</h4>
-                    <input type="text" id="customer-name" placeholder="Nama Pelanggan (Wajib)">
-                    <input type="email" id="customer-email" placeholder="Email (opsional untuk struk)">
+                <!-- MODUL TAMBAH MENU BARU SECARA REAL-TIME -->
+                <div class="ios-panel panel-management-menu">
+                    <h3>🛠️ Modul Manajemen Tambah Menu Dinamis</h3>
+                    <div class="form-add-product-inline">
+                        <input type="text" id="new-product-name" placeholder="Nama Minuman Baru">
+                        <input type="number" id="new-product-price" placeholder="Harga Jual (Rp)" min="0">
+                        <button id="btn-save-new-product">Tambah ke Katalog</button>
+                    </div>
+                </div>
+
+                <!-- CARDS REKAPITULASI BERKALA BERDASARKAN FILTER KALENDER -->
+                <div class="rekap-grid-four-columns">
+                    <div class="rekap-card card-hari">
+                        <h4>Omzet Hari Ini</h4>
+                        <h2 id="txt-rekap-hari">Rp 0</h2>
+                    </div>
+                    <div class="rekap-card card-minggu">
+                        <h4>7 Hari Terakhir</h4>
+                        <h2 id="txt-rekap-minggu">Rp 0</h2>
+                    </div>
+                    <div class="rekap-card card-bulan">
+                        <h4>Bulan Ini</h4>
+                        <h2 id="txt-rekap-bulan">Rp 0</h2>
+                    </div>
+                    <div class="rekap-card card-tahun">
+                        <h4>Tahun Ini</h4>
+                        <h2 id="txt-rekap-tahun">Rp 0</h2>
+                    </div>
+                </div>
+
+                <!-- VISUALISASI GRAFIK BULANAN (CHART.JS) -->
+                <div class="ios-panel panel-chart">
+                    <h3>Tren Grafik Perkembangan Finansial Bulanan</h3>
+                    <div class="chart-container-fixed">
+                        <canvas id="owner-monthly-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- LOG RIWAYAT TRANSAKSI 1 TAHUN TERAKHIR & KONTROL VOID -->
+                <div class="ios-panel panel-history-log">
+                    <div class="history-header-filter">
+                        <h3>Log Transaksi Valid & Kontrol Void</h3>
+                        <div class="filter-wrapper-owner">
+                            <label for="filter-month-owner">Saring Bulan:</label>
+                            <select id="filter-month-owner">
+                                <option value="all">Tampilkan Semua (1 Tahun)</option>
+                                <option value="0">Januari</option>
+                                <option value="1">Februari</option>
+                                <option value="2">Maret</option>
+                                <option value="3">April</option>
+                                <option value="4">Mei</option>
+                                <option value="5">Juni</option>
+                                <option value="6">Juli</option>
+                                <option value="7">Agustus</option>
+                                <option value="8">September</option>
+                                <option value="9">Oktober</option>
+                                <option value="10">November</option>
+                                <option value="11">Desember</option>
+                            </select>
+                        </div>
+                    </div>
                     
-                    <select id="payment-method">
-                        <option value="Cash">Tunai (Cash)</option>
-                        <option value="QRIS">QRIS / Non-Tunai</option>
-                    </select>
+                    <div class="history-table-responsive">
+                        <table class="ios-table-history">
+                            <thead>
+                                <tr>
+                                    <th>ID Nota</th>
+                                    <th>Waktu / Tanggal</th>
+                                    <th>Nama Pelanggan</th>
+                                    <th>Detail Item</th>
+                                    <th>Metode Bayar</th>
+                                    <th>Total Bersih</th>
+                                    <th>Status</th>
+                                    <th>Otoritas Void</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                                <!-- Diisi secara dinamis dengan aturan ketat hak akses -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                    <button id="btn-pay">PROSES BAYAR & STRUK</button>
-                    <button id="btn-compliment">COMPLIMENT (GRATIS)</button>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- MODAL POP-UP QRIS DINAMIS -->
+    <div id="qris-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-content-qris">
+            <h3 id="qris-modal-title">PEMBAYARAN QRIS</h3>
+            <div class="qris-placeholder-image">
+                <!-- Simulasi Cetakan Kode QRIS Statis Menggunakan Elemen Grafis CSS -->
+                <div class="qr-code-box-mock">
+                    <div class="qr-corner top-left"></div>
+                    <div class="qr-corner top-right"></div>
+                    <div class="qr-corner bottom-left"></div>
+                    <div class="qr-center-logo">POS</div>
                 </div>
             </div>
-        </section>
+            <p class="qris-instruction">Silakan scan QRIS di atas pada perangkat HP pelanggan. Tekan tombol di bawah untuk konfirmasi pelunasan.</p>
+            <button id="btn-close-qris-modal">Konfirmasi Pembayaran Lunas</button>
+        </div>
+    </div>
 
-        <!-- HALAMAN OWNER (ZONA REKAP & MANAJERIAL) -->
-        <section id="page-owner" style="display:none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3>Dashboard Manajerial</h3>
-                <button id="btn-download-backup">📥 DOWNLOAD LAPORAN CSV (24 JAM)</button>
-            </div>
-            
-            <!-- Statistik Ringkas -->
-            <div id="stats-summary">
-                <div>
-                    <p style="color: gray; font-size: 0.8rem;">OMZET BERSIH</p>
-                    <h2 id="total-revenue" style="color: var(--pakchill-green);">Rp 0</h2>
-                </div>
-                <div>
-                    <p style="color: gray; font-size: 0.8rem;">TOTAL TRANSAKSI</p>
-                    <h2 id="transaction-count">0</h2>
-                </div>
-            </div>
+    <!-- AREA LAYOUT STRUK THERMAL TERSEMBUNYI (KHUSUS UNTUK OPSIONIL LANGSUNG CETAK) -->
+    <div id="thermal-receipt-area" class="thermal-print-hidden">
+        <!-- Struktur cetakan 58mm/80mm diisi via JS sewaktu klik tombol cetak fisik -->
+    </div>
 
-            <!-- Grafik Penjualan -->
-            <div id="chart-container" style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px;">
-                <h4 style="margin-bottom: 15px;">Grafik Penjualan Terakhir</h4>
-                <canvas id="sales-chart" height="80"></canvas>
-            </div>
-
-            <!-- Tabel Riwayat Penjualan -->
-            <div id="transaction-history">
-                <h4 style="margin-bottom: 10px;">Riwayat Transaksi & Void</h4>
-                <table border="0" width="100%">
-                    <thead>
-                        <tr>
-                            <th>Waktu</th>
-                            <th>Pelanggan</th>
-                            <th>Item</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <!-- Baris transaksi akan diisi oleh script.js -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- 3. PEMANGGILAN JAVASCRIPT (OTAK) -->
+    <!-- Hubungkan ke modul logika utama -->
     <script src="script.js"></script>
 </body>
 </html>
