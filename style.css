@@ -25,7 +25,7 @@
 }
 
 /* ==========================================================================
-   2. AMBIENT MOTION ANIMATION (EFEK LATAR BELAKANG PREMIUM BERGERAK)
+   2. AMBIENT MOTION ANIMATION (GRADASI HIJAU BERGERAK PREMIUM)
    ========================================================================== */
 body {
     background: linear-gradient(135deg, var(--pakchill-green-light), #f0fdf0, #e0f2df);
@@ -42,7 +42,7 @@ body {
 }
 
 /* ==========================================================================
-   3. OVERLAY LOGIN SCREEN
+   3. SYSTEM OVERLAY LOGIN CARD
    ========================================================================== */
 .login-overlay {
     position: fixed;
@@ -63,121 +63,43 @@ body {
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
 }
 
-.login-logo {
-    font-size: 50px;
-    margin-bottom: 10px;
-}
+.login-logo { font-size: 50px; margin-bottom: 10px; }
+.login-card h2 { color: var(--pakchill-green-dark); font-weight: 800; font-size: 24px; margin-bottom: 5px; }
+.version-tag { font-size: 14px; background: var(--accent-orange); color: white; padding: 2px 6px; border-radius: 6px; vertical-align: middle; }
+.login-card p { color: var(--text-muted); font-size: 13px; margin-bottom: 25px; }
 
-.login-card h2 {
-    color: var(--pakchill-green-dark);
-    font-weight: 800;
-    font-size: 24px;
-    margin-bottom: 5px;
-}
+.form-group { text-align: left; margin-bottom: 20px; }
+.form-group label { display: block; font-size: 12px; font-weight: bold; color: var(--pakchill-green-soft); margin-bottom: 6px; text-transform: uppercase; }
+.form-group input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: var(--radius-premium); font-size: 18px; text-align: center; letter-spacing: 4px; transition: all 0.3s ease; }
+.form-group input:focus { border-color: var(--pakchill-green-soft); outline: none; background: #fafdfa; }
 
-.version-tag {
-    font-size: 14px;
-    background: var(--accent-orange);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 6px;
-    vertical-align: middle;
-}
-
-.login-card p {
-    color: var(--text-muted);
-    font-size: 13px;
-    margin-bottom: 25px;
-}
-
-.form-group {
-    text-align: left;
-    margin-bottom: 20px;
-}
-
-.form-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--pakchill-green-soft);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid #ddd;
-    border-radius: var(--radius-premium);
-    font-size: 18px;
-    text-align: center;
-    letter-spacing: 4px;
-    transition: all 0.3s ease;
-}
-
-.form-group input:focus {
-    border-color: var(--pakchill-green-soft);
-    outline: none;
-    background: #fafdfa;
-}
-
-.btn-login {
-    width: 100%;
-    padding: 14px;
-    background: var(--pakchill-green-soft);
-    color: white;
-    font-weight: bold;
-    border: none;
-    border-radius: var(--radius-premium);
-    cursor: pointer;
-    font-size: 15px;
-    transition: background 0.2s;
-}
-
+.btn-login { width: 100%; padding: 14px; background: var(--pakchill-green-soft); color: white; font-weight: bold; border: none; border-radius: var(--radius-premium); cursor: pointer; font-size: 15px; transition: background 0.2s; }
 .btn-login:hover { background: var(--pakchill-green-dark); }
 .pin-hint { font-size: 11px; margin-top: 15px; color: #888; font-style: italic; }
 
 /* ==========================================================================
-   4. APP LAYER LAYOUT (HEADER & BASE PANELS)
+   4. LAYOUT CORE (HEADER & BASE WORKSPACE SYSTEM)
    ========================================================================== */
 .main-app { padding: 20px; max-width: 1400px; margin: 0 auto; }
-
-.main-header {
-    display: flex; justify-content: space-between; align-items: center;
-    background: white; padding: 18px 25px;
-    border-radius: var(--radius-premium);
-    box-shadow: var(--shadow-premium);
-    margin-bottom: 20px;
-}
-
+.main-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 18px 25px; border-radius: var(--radius-premium); box-shadow: var(--shadow-premium); margin-bottom: 20px; }
 .main-header h1 { font-size: 20px; color: var(--pakchill-green-dark); font-weight: 800; }
 .order-seq-badge { font-size: 13px; color: var(--accent-orange); font-weight: bold; margin-top: 3px; }
-
-.role-badge {
-    background: var(--pakchill-green-light);
-    color: var(--pakchill-green-dark);
-    padding: 6px 14px; border-radius: 20px;
-    font-weight: bold; font-size: 12px; margin-right: 10px;
-}
-
-.btn-logout {
-    padding: 6px 14px; background: var(--accent-red); color: white;
-    border: none; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer;
-}
+.role-badge { background: var(--pakchill-green-light); color: var(--pakchill-green-dark); padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 12px; margin-right: 10px; }
+.btn-logout { padding: 6px 14px; background: var(--accent-red); color: white; border: none; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
 /* ==========================================================================
-   5. RESPONSIFITAS MOBILE GRID SYSTEM (KASIR GRID ENGINE)
+   5. RESPONSIFITAS MOBILE GRID ENGINE (PORTRAIT 2 KOLOM VS SIDE-BY-SIDE)
    ========================================================================== */
 .kasir-grid {
     display: grid;
-    grid-template-columns: 1fr; /* Default Mobile Portrait: 1 Kolom Penuh */
+    grid-template-columns: 1fr; /* Default Mobile Portrait: 1 Kolom memanjang ke bawah */
     gap: 20px;
 }
 
-/* Responsif Tablet / HP Landscape / Desktop Screen */
+/* Responsif Layar Lebar: Tablet / HP Landscape / Desktop Screen */
 @media (min-width: 900px) {
     .kasir-grid {
-        grid-template-columns: 1.6fr 1.1fr; /* Layout Side-by-Side */
+        grid-template-columns: 1.5fr 1fr; /* Layout Terbagi Side-by-Side */
     }
 }
 
@@ -192,10 +114,10 @@ body {
 .section-title { margin-bottom: 15px; border-bottom: 2px solid var(--pakchill-green-light); padding-bottom: 8px; }
 .section-title h3 { color: var(--pakchill-green-dark); font-size: 16px; font-weight: 800; }
 
-/* Catalog Item Layout */
+/* Grid Katalog Produk Dinamis */
 .catalog-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* HP Portrait: Otomatis 2 Kolom Katalog */
+    grid-template-columns: repeat(2, 1fr); /* HP Portrait: Otomatis Menjadi 2 Kolom */
     gap: 12px;
 }
 
@@ -203,7 +125,7 @@ body {
 @media (min-width: 1100px) { .catalog-grid { grid-template-columns: repeat(4, 1fr); } }
 
 /* ==========================================================================
-   6. KATALOG CARD & CART STYLING
+   6. VISUAL CARD KATALOG & MANAJEMEN KERANJANG
    ========================================================================== */
 .product-item-card {
     background: white; border: 1px solid #e2eee1;
@@ -218,52 +140,42 @@ body {
     border-color: var(--pakchill-green-soft);
 }
 
-.product-name { font-weight: 700; font-size: 14px; color: var(--pakchill-green-dark); margin-bottom: 5px; text-transform: uppercase; }
-.product-price { font-weight: 800; font-size: 13px; color: var(--pakchill-green-soft); }
+.product-name { font-weight: 700; font-size: 13px; color: var(--pakchill-green-dark); margin-bottom: 5px; text-transform: uppercase; }
+.product-price { font-weight: 800; font-size: 12px; color: var(--pakchill-green-soft); }
 
 .bundle-card { border: 1px dashed var(--accent-orange); background: #fffbf5; }
 .bundle-card .product-name { color: var(--accent-orange); }
 
-/* Cart Rows */
-.cart-wrapper { min-height: 150px; max-height: 320px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
+.complimentary-card { border: 1px solid var(--accent-blue); background: #f2f7ff; }
+.complimentary-card .product-name { color: var(--accent-blue); }
 
-.cart-item-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px; background: #f9fbf9; border-radius: 8px;
-    margin-bottom: 6px; font-size: 13px; border-left: 3px solid var(--pakchill-green-soft);
-}
+/* Cart Element Setup */
+.cart-wrapper { min-height: 120px; max-height: 280px; overflow-y: auto; margin-bottom: 15px; padding-right: 5px; }
+.cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9fbf9; border-radius: 8px; margin-bottom: 6px; font-size: 13px; border-left: 3px solid var(--pakchill-green-soft); }
+.cart-item-row.comp-row { border-left-color: var(--accent-blue); background: #f5f9ff; }
+.btn-remove-cart { background: var(--accent-red); color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 8px; }
 
-.cart-item-row span { font-weight: bold; color: var(--text-dark); }
-.btn-remove-cart {
-    background: var(--accent-red); color: white; border: none;
-    border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin-left: 8px;
-}
-
-/* Ringkasan Billing */
+/* Summary Billing Box */
 .billing-summary { background: #f3f9f2; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
-.bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 6px; }
+.bill-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: bold; }
 .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
 .grid-inputs label { font-size: 10px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 3px; }
 .grid-inputs input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 12px; font-weight: bold; }
-
 .total-row { border-top: 2px solid #d3ebd1; padding-top: 8px; font-weight: 900; font-size: 16px; color: var(--pakchill-green-dark); }
 
 /* ==========================================================================
-   7. FORM CONTROL, SUB-PANEL PEMBAYARAN, & MEMBER KASIR
+   7. INTERFACE INPUT, MEMBERSHIP AREA, & BUTTON ACTION
    ========================================================================== */
 label { font-size: 11px; font-weight: bold; color: var(--pakchill-green-dark); display: block; margin-bottom: 4px; text-transform: uppercase; }
-select, input[type="text"], input[type="number"] {
-    width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
-}
+select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
 select:focus, input:focus { border-color: var(--pakchill-green-soft); outline: none; }
 
 .sub-pay-panel { background: white; padding: 12px; border: 1px solid #e0efe0; border-radius: 8px; margin-top: -6px; margin-bottom: 12px; }
 .return-badge { background: #fff0f0; color: var(--accent-red); font-weight: 900; padding: 6px; border-radius: 6px; font-size: 13px; text-align: center; }
 .qris-container { text-align: center; }
-.qris-image { width: 100%; max-width: 180px; height: auto; margin: 8px auto; display: block; border: 1px solid #eee; padding: 5px; background: white; }
+.qris-image { width: 100%; max-width: 160px; height: auto; margin: 8px auto; display: block; border: 1px solid #eee; padding: 5px; background: white; }
 .rekening-info-box { background: var(--pakchill-green-light); color: var(--pakchill-green-dark); padding: 8px; border-radius: 6px; font-size: 12px; font-weight: bold; border-left: 4px solid var(--pakchill-green-soft); }
 
-/* Member Kasir */
 .member-kasir-area { background: #fbfbfb; border: 1px solid #eee; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
 .member-status-lbl { font-size: 12px; font-weight: 900; color: var(--accent-orange); margin-top: -6px; margin-bottom: 10px; min-height: 15px; }
 .fast-member-box { border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 5px; }
@@ -272,7 +184,6 @@ select:focus, input:focus { border-color: var(--pakchill-green-soft); outline: n
 .fast-inputs input { margin: 0; padding: 6px; }
 .fast-inputs button { background: var(--pakchill-green-soft); color: white; border: none; border-radius: 6px; padding: 0 12px; font-weight: bold; cursor: pointer; }
 
-/* Buttons Action Kasir */
 .action-buttons-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .btn-action { width: 100%; padding: 12px; font-weight: bold; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; text-align: center; color: white; }
 .btn-success { background: var(--pakchill-green-soft); }
@@ -280,7 +191,7 @@ select:focus, input:focus { border-color: var(--pakchill-green-soft); outline: n
 .btn-print { background: var(--accent-blue); }
 
 /* ==========================================================================
-   8. CLOSING SHIFT & OWNER CONTROL SYSTEM
+   8. MONITOR REPORT CLOSING & PANEL DASHBOARD EXECUTIVE OWNER
    ========================================================================== */
 .closing-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
 .metric-card { padding: 18px; border-radius: 10px; text-align: center; background: white; border: 1px solid #eef; }
@@ -299,7 +210,7 @@ select:focus, input:focus { border-color: var(--pakchill-green-soft); outline: n
 .btn-export.pdf { background: #e11d48; }
 .btn-export.excel { background: #16a34a; }
 
-/* Owner Component Customization */
+/* Dashboard Owner Workspace Component */
 .owner-layer { margin-top: 30px; }
 .owner-divider { border: none; border-top: 3px double var(--pakchill-green-soft); margin: 25px 0; }
 .owner-section-title { font-size: 18px; font-weight: 900; color: var(--pakchill-green-dark); margin-bottom: 15px; }
@@ -311,7 +222,7 @@ select:focus, input:focus { border-color: var(--pakchill-green-soft); outline: n
 .chart-section-owner { background: white; padding: 15px; border-radius: var(--radius-premium); box-shadow: var(--shadow-premium); margin-bottom: 20px; }
 .chart-container { position: relative; height: 260px; width: 100%; }
 
-/* CRUD Form & Tables Grid */
+/* CRUD Operations Panel Component CSS Layout */
 .owner-crud-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 25px; }
 @media (min-width: 950px) { .owner-crud-grid { grid-template-columns: 1fr 1fr; } }
 
@@ -329,14 +240,13 @@ th { background: #f5fafd; color: var(--pakchill-green-dark); font-weight: bold; 
 .crud-card table button { background: var(--accent-blue); color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; margin-right: 2px; }
 .crud-card table button:last-child { background: var(--accent-red); }
 
-/* Master Log Section Control */
 .master-log-section { background: white; padding: 20px; border-radius: var(--radius-premium); box-shadow: var(--shadow-premium); }
 .section-title-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .section-title-flex select { width: auto; margin: 0; padding: 4px 10px; }
 .master-log-section table button { background: var(--accent-red); color: white; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
 /* ==========================================================================
-   9. THERMAL PRINTING @MEDIA STRUCTURE (ANTI-HACKING SCREEN)
+   9. THERMAL PRINTER @MEDIA CONFIGURATION ENGINE (ANTI ELEMEN HACK)
    ========================================================================== */
 .thermal-print-area { display: none; }
 
