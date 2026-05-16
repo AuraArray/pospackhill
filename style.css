@@ -1,21 +1,14 @@
 /* ==========================================================================
-   RESET & VARIABEL DOKUMEN (IOS PREMIUM SYSTEM)
+   1. CORE ENGINE GRADIENT & AMBIENT MOTION FLUID
    ========================================================================== */
 :root {
-    --ios-bg-gradient-start: #eaf4e8;
-    --ios-bg-gradient-end: #cce3cb;
     --pakchill-green-dark: #1e3f1b;
     --pakchill-green-medium: #2d5a27;
     --pakchill-green-soft: #478241;
-    --pakchill-green-light: #77b271;
-    --pakchill-green-accent: #a3d99e;
-    --ios-card-bg: rgba(255, 255, 255, 0.75);
-    --ios-card-blur: saturate(180%) blur(20px);
-    --ios-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-    --text-primary: #1c1c1e;
-    --text-secondary: #636366;
-    --system-red: #ff3b30;
-    --system-orange: #ff9500;
+    --pakchill-light-bg: rgba(255, 255, 255, 0.85);
+    --ios-blur: blur(25px);
+    --shadow-premium: 0 10px 40px rgba(30, 63, 27, 0.07);
+    --border-ios: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 * {
@@ -23,635 +16,382 @@
     padding: 0;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
 }
 
 body {
-    overflow-x: hidden;
-    color: var(--text-primary);
     min-height: 100vh;
-    background-color: var(--ios-bg-gradient-start);
-}
-
-/* ==========================================================================
-   ANIMASI LATAR BELAKANG FLUIDA (iOS 26 FLUID AMBIENT)
-   ========================================================================== */
-.fluid-ambient-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    background: linear-gradient(135deg, #eaf4e8, #cce3cb, #b3dbae, #e0f0dc);
+    background: linear-gradient(-45deg, #e4f0e2, #cbdcc8, #b8dbb4, #f2f7f1);
     background-size: 400% 400%;
-    animation: fluidMotion 18s ease infinite;
+    animation: ambientFluidMotion 14s ease infinite;
+    color: #1c1c1e;
+    overflow-x: hidden;
 }
 
-@keyframes fluidMotion {
+@keyframes ambientFluidMotion {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
 /* ==========================================================================
-   ANIMASI TRANSISI IOS (FADE & SLIDE)
+   2. RESPONSIFITAS LAYOUT & STRUKTUR PEMBAGIAN GRID ADAPTIF
    ========================================================================== */
-.ios-fade-in {
-    animation: iosFadeIn 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes iosFadeIn {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.page-view {
-    display: none;
-    opacity: 0;
-    transform: translateY(15px);
-    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.page-view.active-view {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* ==========================================================================
-   GERBANG UTAMA: LAYAR LOGIN
-   ========================================================================== */
-#login-screen {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-.login-card-premium {
-    background: var(--ios-card-bg);
-    backdrop-filter: var(--ios-card-blur);
-    -webkit-backdrop-filter: var(--ios-card-blur);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 24px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: var(--ios-shadow);
-}
-
-.brand-logo-animation {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, var(--pakchill-green-medium), var(--pakchill-green-light));
-    margin: 0 auto 20px;
-    border-radius: 18px;
-    box-shadow: 0 8px 16px rgba(45, 90, 39, 0.2);
-}
-
-.login-card-premium h1 {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--pakchill-green-dark);
-    margin-bottom: 4px;
-}
-
-.brand-version {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 30px;
-}
-
-.secure-input-wrapper input {
-    width: 100%;
-    padding: 14px 16px;
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+nav {
     background: rgba(255, 255, 255, 0.6);
-    font-size: 16px;
-    text-align: center;
-    letter-spacing: 4px;
-    margin-bottom: 20px;
-    outline: none;
-    transition: all 0.3s;
-}
-
-.secure-input-wrapper input:focus {
-    border-color: var(--pakchill-green-medium);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.15);
-}
-
-#btn-login {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 14px;
-    background: var(--pakchill-green-medium);
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-#btn-login:hover { background: var(--pakchill-green-dark); }
-#btn-login:active { transform: scale(0.98); }
-
-/* ==========================================================================
-   NAVIGATION BAR (IOS STYLE)
-   ========================================================================== */
-.ios-navbar {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: var(--ios-card-blur);
-    -webkit-backdrop-filter: var(--ios-card-blur);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    padding: 12px 24px;
+    backdrop-filter: var(--ios-blur);
+    -webkit-backdrop-filter: var(--ios-blur);
+    padding: 12px 4%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: var(--border-ios);
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.logo-text {
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--pakchill-green-dark);
-    margin-right: 12px;
-}
-
-.user-badge {
-    background: var(--pakchill-green-soft);
+#badge-status-role {
+    background: var(--pakchill-green-dark);
     color: white;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 10px;
+    padding: 5px 14px;
     border-radius: 20px;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
-.nav-right { display: flex; gap: 8px; }
-
-.nav-item {
-    background: transparent;
-    border: none;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-radius: 10px;
+.logout-btn {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 6px 14px !important;
+    background: #ff3b30 !important;
+    color: white !important;
+    border: none !important;
+    font-weight: bold;
+    border-radius: 10px !important;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
-.nav-item:hover { background: rgba(0, 0, 0, 0.04); color: var(--text-primary); }
-.nav-item.active { background: var(--pakchill-green-medium); color: white; }
-
-.nav-item-logout {
-    background: rgba(255, 59, 48, 0.1);
-    color: var(--system-red);
-    border: none;
-    padding: 8px 14px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.nav-item-logout:hover { background: var(--system-red); color: white; }
-
-/* ==========================================================================
-   LAYOUT STRUKTUR KERJA
-   ========================================================================== */
 .workspace-container {
-    max-width: 1400px;
-    margin: 24px auto;
-    padding: 0 24px;
+    padding: 20px 3%;
+    width: 100%;
 }
 
-.ios-panel {
-    background: var(--ios-card-bg);
-    backdrop-filter: var(--ios-card-blur);
-    -webkit-backdrop-filter: var(--ios-card-blur);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--ios-shadow);
+.main-welcome-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--pakchill-green-dark);
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
 }
 
-.panel-header h2 { font-size: 18px; font-weight: 700; color: var(--pakchill-green-dark); }
-.panel-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
-
-/* ==========================================================================
-   TERMINAL KASIR (GRID & COMPONENTS)
-   ========================================================================== */
-.kasir-grid-layout {
+/* Default Layar Lebar: Bersebelahan (Side-by-Side) */
+.kasir-operational-grid {
     display: grid;
-    grid-template-columns: 1fr 480px;
-    gap: 24px;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 20px;
     align-items: start;
 }
 
-/* KATALOG PRODUK */
-.products-flex-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
+.ios-panel-card {
+    background: var(--pakchill-light-bg);
+    backdrop-filter: var(--ios-blur);
+    -webkit-backdrop-filter: var(--ios-blur);
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: var(--shadow-premium);
+    border: var(--border-ios);
+    margin-bottom: 20px;
 }
 
+.products-adaptive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+}
+
+/* INTERFASE ATURAN ADAPTIF LAYAR SMARTPHONE (HP PORTRAIT) */
+@media (max-width: 850px) {
+    .kasir-operational-grid {
+        grid-template-columns: 1fr; /* Menumpuk Ke bawah */
+    }
+    .katalog-section-card {
+        order: 1; /* Katalog Di Atas */
+    }
+    .checkout-section-card {
+        order: 2; /* Keranjang pindah ke bawah jempol kasir */
+    }
+    .products-adaptive-grid {
+        grid-template-columns: repeat(2, 1fr) !important; /* WAJIB OTO 2 KOLOM */
+    }
+    .main-welcome-title {
+        font-size: 20px;
+    }
+}
+
+/* ==========================================================================
+   3. DESAIN VISUAL ELEMEN KATALOG & KERANJANG
+   ========================================================================== */
 .product-item-card {
     background: white;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    border-radius: 16px;
-    padding: 20px 16px;
+    padding: 18px 12px;
+    border-radius: 20px;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: all 0.2s ease;
 }
 
-.product-item-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(45, 90, 39, 0.08);
-    border-color: var(--pakchill-green-accent);
+.product-item-card:active {
+    transform: scale(0.95);
 }
 
-.product-item-card:active { transform: scale(0.96); }
-
-.pro-icon-avatar {
-    width: 50px;
-    height: 50px;
-    background: rgba(45, 90, 39, 0.08);
-    color: var(--pakchill-green-medium);
-    font-size: 24px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    margin: 0 auto 12px;
+.badge-bundling-tag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #ff9500;
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-bottom-right-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.pro-name { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
-.pro-price { font-size: 13px; font-weight: 700; color: var(--pakchill-green-soft); }
-
-/* TABEL KERANJANG */
-.cart-table-wrapper {
-    max-height: 200px;
+#cart-items-wrapper {
+    min-height: 80px;
+    max-height: 240px;
     overflow-y: auto;
-    margin-top: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 12px;
-    background: white;
+    margin-bottom: 15px;
 }
 
-.ios-table-cart {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-.ios-table-cart th {
-    background: rgba(0, 0, 0, 0.02);
-    padding: 10px 14px;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.ios-table-cart td {
-    padding: 12px 14px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-}
-
-.btn-delete-item {
-    background: transparent;
-    border: none;
-    color: var(--system-red);
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-/* PRICING SUMMARY CARD */
-.pricing-summary-card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    margin-top: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.summary-row {
+.cart-item-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.cost-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.input-inline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.input-inline-row label {
+    font-size: 13px;
+    color: #555;
+}
+
+.input-inline-row input {
+    width: 120px !important;
+    margin-bottom: 0 !important;
+    padding: 6px 10px !important;
+    text-align: right;
     font-size: 14px;
 }
 
-.summary-row.field-input {
+.total-tagihan-box {
+    display: flex;
     justify-content: space-between;
-    gap: 12px;
-}
-
-.summary-row.field-input label { color: var(--text-secondary); font-size: 13px; }
-
-.summary-row input {
-    width: 120px;
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.1);
-    text-align: right;
-    font-weight: 600;
-}
-
-.total-highlight {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+    align-items: center;
+    margin: 15px 0 5px 0;
+    padding: 12px;
+    background: rgba(45, 90, 39, 0.07);
+    border-radius: 14px;
     font-weight: 800;
     font-size: 16px;
+}
+
+#txt-grand-total-display {
     color: var(--pakchill-green-dark);
+    font-size: 19px;
 }
 
-/* FORM CHECKOUT */
-.checkout-form-group { margin-top: 20px; }
-.checkout-form-group h3 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; }
-
-.checkout-form-group input, .checkout-form-group select {
-    width: 100%;
+.payment-info-box {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.05);
     padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.1);
-    background: white;
-    font-size: 14px;
-    margin-bottom: 12px;
-    outline: none;
+    border-radius: 16px;
+    margin-bottom: 15px;
 }
 
-.select-label {
+#kasir-member-status-box {
     font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.sub-method-card {
-    background: rgba(45, 90, 39, 0.05);
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    border: 1px dashed var(--pakchill-green-light);
-}
-
-.sub-method-card select { margin-bottom: 0; }
-
-.billing-action-area {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 16px;
-}
-
-.ios-btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-}
-
-.btn-secondary-compliment { background: rgba(0,0,0,0.05); color: var(--text-primary); }
-.btn-primary-email { background: var(--pakchill-green-soft); color: white; }
-.btn-primary-print { background: var(--pakchill-green-medium); color: white; }
-
-.ios-btn:hover { filter: brightness(0.9); }
-.ios-btn:active { transform: scale(0.99); }
-
-
-/* ==========================================================================
-   PANEL OWNER (DASHBOARD MANAJERIAL)
-   ========================================================================== */
-.owner-top-actions-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.management-title h2 { font-size: 22px; font-weight: 800; color: var(--pakchill-green-dark); }
-.management-title p { font-size: 13px; color: var(--text-secondary); }
-
-.export-button-group { display: flex; gap: 10px; }
-
-.btn-export {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-.pdf-theme { background: var(--system-orange); }
-.excel-theme { background: #107c41; }
-
-/* MODUL TAMBAH MENU */
-.panel-management-menu h3 { font-size: 15px; font-weight: 700; color: var(--pakchill-green-dark); margin-bottom: 14px; }
-.form-add-product-inline { display: flex; gap: 12px; }
-.form-add-product-inline input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,0.1);
-    font-size: 14px;
-}
-.form-add-product-inline button {
-    background: var(--pakchill-green-medium);
-    color: white;
-    border: none;
-    padding: 0 24px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* CARDS REKAPITULASI GRID */
-.rekap-grid-four-columns {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin: 24px 0;
-}
-
-.rekap-card {
-    background: white;
-    padding: 20px;
-    border-radius: 16px;
-    border: 1px solid rgba(0,0,0,0.04);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.01);
-}
-
-.rekap-card h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px; }
-.rekap-card h2 { font-size: 20px; font-weight: 800; color: var(--text-primary); }
-
-.card-hari { border-left: 4px solid var(--pakchill-green-light); }
-.card-minggu { border-left: 4px solid var(--pakchill-green-soft); }
-.card-bulan { border-left: 4px solid var(--pakchill-green-medium); }
-.card-tahun { border-left: 4px solid var(--pakchill-green-dark); }
-
-/* GRAPHIC PANEL */
-.panel-chart { margin-bottom: 24px; }
-.panel-chart h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--pakchill-green-dark); }
-.chart-container-fixed { position: relative; height: 300px; width: 100%; }
-
-/* LOG TABLE & FILTER */
-.history-header-filter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-.history-header-filter h3 { font-size: 15px; font-weight: 700; color: var(--pakchill-green-dark); }
-.filter-wrapper-owner { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
-.filter-wrapper-owner select { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); }
-
-.history-table-responsive { overflow-x: auto; background: white; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05); }
-
-.ios-table-history { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-.ios-table-history th { background: rgba(0,0,0,0.02); padding: 12px 16px; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid rgba(0,0,0,0.06); }
-.ios-table-history td { padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.02); }
-
-/* STATUS & VOID STYLING */
-.status-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-.status-badge.success { background: rgba(52, 199, 89, 0.1); color: #248a3d; }
-.status-badge.void { background: rgba(255, 59, 48, 0.1); color: var(--system-red); }
-.status-badge.compliment { background: rgba(0, 122, 255, 0.1); color: #007aff; }
-
-.btn-void-action {
-    background: rgba(255, 59, 48, 0.1);
-    color: var(--system-red);
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-.btn-void-action:hover { background: var(--system-red); color: white; }
-.btn-void-action:disabled { opacity: 0.3; cursor: not-allowed; background: #e5e5ea; color: #8e8e93; }
-
-/* ROW VOID EFFECT CONFORMING TO BLUEPRINT */
-.row-void {
-    background-color: rgba(255, 59, 48, 0.04) !important;
-    text-decoration: line-through;
-    color: #8e8e93;
+    font-weight: bold;
+    margin-bottom: 8px;
 }
 
 /* ==========================================================================
-   MODAL POP-UP QRIS (CUSTOM GRAPHIC DISPLAY)
+   4. LAYAR DEPAN ONDEMAND LOGIN CARD & INPUTS
    ========================================================================== */
-.modal-overlay {
+#login-screen-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
+    top:0; left:0; width:100%; height:100%;
+    z-index: 999;
+    background: linear-gradient(135deg, #e4f0e2, #cbdcc8);
 }
 
-.modal-content-qris {
-    background: white;
-    padding: 30px;
-    border-radius: 24px;
-    width: 100%; max-width: 360px;
+.login-glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: var(--ios-blur);
+    -webkit-backdrop-filter: var(--ios-blur);
+    padding: 40px 30px;
+    border-radius: 32px;
+    width: 100%;
+    max-width: 360px;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    animation: iosFadeIn 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 20px 50px rgba(30, 63, 27, 0.12);
+    border: var(--border-ios);
 }
 
-.modal-content-qris h3 { font-size: 16px; font-weight: 800; color: var(--pakchill-green-dark); margin-bottom: 20px; letter-spacing: 0.5px; }
-
-.qris-placeholder-image {
-    width: 200px; height: 200px;
-    margin: 0 auto 20px;
-    background: #f2f2f7;
-    border-radius: 16px;
-    display: flex; justify-content: center; align-items: center;
-    padding: 16px;
+.pakchill-logo-placeholder {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 18px;
+    border-radius: 22%;
+    background: #fff url('logo-pakchill.png') no-repeat center;
+    background-size: cover;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
 }
 
-.qr-code-box-mock {
-    width: 100%; height: 100%;
-    border: 4px solid #1c1c1e;
-    position: relative;
-    background-image: radial-gradient(#1c1c1e 30%, transparent 32%), radial-gradient(#1c1c1e 30%, transparent 32%);
-    background-size: 8px 8px;
-    background-position: 0 0, 4px 4px;
+input, select, button {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
 }
 
-.qr-corner { width: 35px; height: 35px; border: 6px solid #1c1c1e; position: absolute; background: #f2f2f7; }
-.top-left { top: -2px; left: -2px; }
-.top-right { top: -2px; right: -2px; }
-.bottom-left { bottom: -2px; left: -2px; }
-.qr-center-logo {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--pakchill-green-medium);
-    color: white; padding: 4px 8px;
-    font-size: 10px; font-weight: 800; border-radius: 4px;
+input:focus, select:focus {
+    border-color: var(--pakchill-green-soft);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(71, 130, 65, 0.15);
 }
 
-.qris-instruction { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 24px; }
+button.ios-primary-btn {
+    background: var(--pakchill-green-dark);
+    color: white;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 0;
+}
 
-#btn-close-qris-modal {
-    width: 100%; padding: 12px;
-    background: var(--pakchill-green-medium); color: white;
-    border: none; border-radius: 12px;
-    font-weight: 600; cursor: pointer;
+button.ios-primary-btn:active {
+    transform: scale(0.97);
 }
 
 /* ==========================================================================
-   LAYOUT STRUK THERMAL (KHUSUS PRINTER THERMAL & HIDDEN WINDOW)
+   5. DASHBOARD OWNER TABLES & REKAP CARDS
    ========================================================================== */
-.thermal-print-hidden { display: none; }
+.rekap-owner-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.card-rekap-box {
+    padding: 20px;
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+}
+
+.card-rekap-box h5 {
+    font-size: 12px;
+    text-transform: uppercase;
+    opacity: 0.9;
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+}
+
+.card-rekap-box h2 {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.ios-table-view {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+    margin-top: 10px;
+}
+
+.ios-table-view th {
+    background: rgba(0,0,0,0.04);
+    padding: 12px 10px;
+    font-weight: 700;
+    color: #444;
+}
+
+.ios-table-view td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    background: white;
+}
+
+.qris-container-preset {
+    width: 100%;
+    max-width: 220px;
+    margin: 10px auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 10px;
+    background: white;
+}
+
+#live-rekening-info-box {
+    padding: 10px;
+    background: #f0f7ff;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #007aff;
+    border: 1px solid #cbdff7;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   6. FORMAT STRUK NOTA THERMAL (58mm) KETIKA PRINT
+   ========================================================================== */
+#thermal-receipt-output {
+    width: 58mm;
+    padding: 6px;
+    background: #fff;
+    color: #000;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    line-height: 1.2;
+    display: none;
+}
 
 @media print {
-    body * { visibility: hidden; }
-    .fluid-ambient-background { display: none !important; }
-    #thermal-receipt-area, #thermal-receipt-area * { visibility: visible; }
-    #thermal-receipt-area {
-        display: block !important;
-        position: absolute;
-        left: 0; top: 0;
-        width: 58mm; /* Mendukung set up standard 58mm s/d 80mm thermal roll */
-        padding: 2mm;
-        color: #000000;
-        background: #ffffff;
-        font-size: 11px;
-        line-height: 1.3;
-    }
-    .thermal-receipt { width: 100%; text-align: left; }
-    .thermal-header { text-align: center; margin-bottom: 6px; }
-    .thermal-header h2 { font-size: 14px; font-weight: 800; }
-    .thermal-divider { border-top: 1px dashed #000000; margin: 6px 0; }
-    .thermal-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-    .thermal-total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; margin-top: 3px; }
-    .thermal-footer { text-align: center; margin-top: 10px; font-size: 10px; }
+    body * { display: none !important; }
+    #thermal-receipt-output, #thermal-receipt-output * { display: block !important; }
+    #thermal-receipt-output { position: absolute; left: 0; top: 0; width: 58mm; }
 }
