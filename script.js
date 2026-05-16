@@ -37,7 +37,7 @@ function saveToStorage() {
 }
 
 // ==========================================================================
-// 2. OTENTIKASI SISTEM AMAN (KASIR: 123 | OWNER: 000)
+// 2. OTENTIKASI SISTEM AMAN & WARNA IDENTITAS (KASIR: 123 | OWNER: 000)
 // ==========================================================================
 function executeAuthentication() {
     const pinInput = document.getElementById('sys-pin-access');
@@ -52,7 +52,7 @@ function executeAuthentication() {
         const roleBadge = document.getElementById('badge-status-role');
         if (roleBadge) {
             roleBadge.innerText = 'Staff Kasir';
-            roleBadge.style.background = '#2d5a27';
+            roleBadge.style.background = '#2d5a27'; // Warna Hijau Gelap Pakchill
         }
         if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid';
         if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'none';
@@ -62,7 +62,7 @@ function executeAuthentication() {
         const roleBadge = document.getElementById('badge-status-role');
         if (roleBadge) {
             roleBadge.innerText = 'Owner Control';
-            roleBadge.style.background = '#5856d6';
+            roleBadge.style.background = '#1b3d16'; // Hijau Tua Premium
         }
         if (document.getElementById('view-segment-kasir')) document.getElementById('view-segment-kasir').style.display = 'grid'; 
         if (document.getElementById('view-segment-owner')) document.getElementById('view-segment-owner').style.display = 'block';
@@ -78,7 +78,7 @@ function unlockInterface() {
     if (document.getElementById('sys-pin-access')) document.getElementById('sys-pin-access').value = '';
     if (document.getElementById('txt-live-order-number')) document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
-    // Eksekusi Render dengan Proteksi Error (Supaya jika satu error, yang lain tidak macet)
+    // Eksekusi Render Aman (Satu fungsi eror tidak akan membuat tombol lain macet)
     safeExecute(renderKatalogKasir, "Render Katalog");
     safeExecute(renderCartUI, "Render Cart");
     safeExecute(renderHistoryTable, "Render Histori");
@@ -91,7 +91,6 @@ function unlockInterface() {
     }
 }
 
-// Fungsi pembungkus aman agar tidak memutus aliran logika JS jika ada kegagalan komponen visual
 function safeExecute(fn, label) {
     try {
         fn();
@@ -109,7 +108,7 @@ function triggerSystemLogout() {
 }
 
 // ==========================================================================
-// 3. CATALOG & CART ENGINE
+// 3. CATALOG & CART ENGINE (MENGGUNAKAN VARIABEL WARNA ASLI)
 // ==========================================================================
 function renderKatalogKasir() {
     const target = document.getElementById('katalog-render-target');
@@ -117,30 +116,31 @@ function renderKatalogKasir() {
     target.innerHTML = '';
 
     if (sysDatabase.menu.length === 0 && sysDatabase.bundles.length === 0) {
-        target.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777; padding:20px; font-style:italic;">Katalog kosong. Masuk sebagai Owner (PIN: 000) untuk menambah menu / produk komplimenter.</p>';
+        target.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#555; padding:20px; font-style:italic;">Katalog kosong. Masuk sebagai Owner untuk menambah menu baru.</p>';
         return;
     }
 
     sysDatabase.menu.forEach(item => {
         const isComp = item.type === 'Complimentary';
         const displayPrice = isComp ? 'FREE / BONUS' : `Rp ${item.price.toLocaleString('id-ID')}`;
-        const tagBadge = isComp ? '<span class="badge-complimentary-tag">Complimentary</span>' : '';
+        // Gunakan badge dengan warna tema hijau pakchill asli
+        const tagBadge = isComp ? '<span class="badge-complimentary-tag" style="background:#5856d6; color:white; padding:2px 6px; border-radius:4px; font-size:10px; position:absolute; top:5px; left:5px;">Complimentary</span>' : '';
         
         target.innerHTML += `
-            <div class="product-item-card" onclick="pushItemToCart('${item.name}', ${item.price})">
+            <div class="product-item-card" onclick="pushItemToCart('${item.name}', ${item.price})" style="position:relative; cursor:pointer;">
                 ${tagBadge}
-                <div style="font-weight:900; font-size:15px; color:var(--pakchill-green-dark); margin-top:${isComp?'10px':'0'};">${item.name}</div>
-                <div style="color:${isComp?'#5856d6':'var(--pakchill-green-soft)'}; font-weight:700; margin-top:5px;">${displayPrice}</div>
+                <div style="font-weight:900; font-size:15px; color:var(--pakchill-green-dark, #2d5a27); margin-top:${isComp?'18px':'0'};">${item.name}</div>
+                <div style="color:var(--pakchill-green-soft, #417537); font-weight:700; margin-top:5px;">${displayPrice}</div>
             </div>
         `;
     });
 
     sysDatabase.bundles.forEach(bundle => {
         target.innerHTML += `
-            <div class="product-item-card" onclick="pushItemToCart('${bundle.name}', ${bundle.price})">
-                <span class="badge-bundling-tag">Paket</span>
-                <div style="font-weight:900; font-size:14px; color:#ff9500; margin-top:10px;">${bundle.name}</div>
-                <div style="color:var(--pakchill-green-soft); font-weight:700; margin-top:5px;">Rp ${bundle.price.toLocaleString('id-ID')}</div>
+            <div class="product-item-card" onclick="pushItemToCart('${bundle.name}', ${bundle.price})" style="position:relative; cursor:pointer;">
+                <span class="badge-bundling-tag" style="background:#ff9500; color:white; padding:2px 6px; border-radius:4px; font-size:10px; position:absolute; top:5px; left:5px;">Paket</span>
+                <div style="font-weight:900; font-size:14px; color:#ff9500; margin-top:18px;">${bundle.name}</div>
+                <div style="color:var(--pakchill-green-soft, #417537); font-weight:700; margin-top:5px;">Rp ${bundle.price.toLocaleString('id-ID')}</div>
             </div>
         `;
     });
@@ -162,7 +162,7 @@ function renderCartUI() {
     container.innerHTML = '';
     
     if (activeCart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#999; font-size:13px; padding:20px;">Keranjang belanja kosong.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#666; font-size:13px; padding:20px;">Keranjang belanja kosong.</p>';
         if (document.getElementById('txt-subtotal-val')) document.getElementById('txt-subtotal-val').innerText = 'Rp 0';
         if (document.getElementById('txt-grand-total-display')) document.getElementById('txt-grand-total-display').innerText = 'Rp 0';
         return;
@@ -171,9 +171,9 @@ function renderCartUI() {
     activeCart.forEach(item => {
         const costStr = item.price === 0 ? 'FREE' : `Rp ${item.price.toLocaleString('id-ID')}`;
         container.innerHTML += `
-            <div class="cart-item-row">
+            <div class="cart-item-row" style="display:flex; justify-content:between; align-items:center; margin-bottom:8px;">
                 <div style="width: 45%; font-weight:bold; font-size:13px;">${item.name}</div>
-                <div style="width: 35%; text-align: right; font-size:13px; color:#333;">${costStr}</div>
+                <div style="width: 35%; text-align: right; font-size:13px; color:#111;">${costStr}</div>
                 <div style="width: 20%; text-align: right;">
                     <button onclick="removeItemFromCart(${item.uid})" style="width:auto; margin:0; padding:3px 8px; background:#ff3b30; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; font-size:11px;">✕</button>
                 </div>
@@ -266,7 +266,7 @@ function executeLiveSearchMember() {
     
     if (activeMemberObj) {
         infoBox.innerText = `🌟 MEMBER: ${activeMemberObj.name} | WA: ${activeMemberObj.wa} | Poin: ${activeMemberObj.poin}`;
-        infoBox.style.color = "#2d5a27";
+        infoBox.style.color = "var(--pakchill-green-dark, #2d5a27)";
     } else {
         infoBox.innerText = "Status: Pelanggan Umum";
         infoBox.style.color = "#ff9500";
@@ -335,9 +335,9 @@ function calculateLiveClosingDashboard() {
 
     mapKeys.forEach(mName => {
         menuListTarget.innerHTML += `
-            <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.02); padding:4px 8px; border-radius:6px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; background:rgba(0,0,0,0.03); padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:4px;">
                 <span>🥗 ${mName}</span>
-                <span style="font-weight:bold; color:var(--pakchill-green-dark);">${menuMap[mName]} Porsi</span>
+                <span style="font-weight:bold; color:var(--pakchill-green-dark, #2d5a27);">${menuMap[mName]} Porsi</span>
             </div>
         `;
     });
@@ -480,7 +480,7 @@ function exportOwnerReportExcel() {
 }
 
 // ==========================================================================
-// 8. SUITE MANAGEMENT METRICS OWNER (INTEGRASI KARTU & GRAFIK AMAN)
+// 8. SUITE MANAGEMENT METRICS OWNER
 // ==========================================================================
 function renderOwnerDashboardMetrics() {
     const validTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses');
@@ -503,7 +503,7 @@ function renderOwnerDashboardMetrics() {
     if (document.getElementById('own-rekap-bulan')) document.getElementById('own-rekap-bulan').innerText = 'Rp ' + omzetBulan.toLocaleString('id-ID');
     if (document.getElementById('own-rekap-tahun')) document.getElementById('own-rekap-tahun').innerText = 'Rp ' + omzetTahun.toLocaleString('id-ID');
 
-    // PROTEKSI GRAFIK: Jika Chart.js gagal / terblokir, sistem manajemen data utama owner tidak boleh mati!
+    // PROTEKSI GRAFIK AGAR TETAP AMAN & WARNA HIJAU PAKCHILL
     try {
         if (typeof Chart !== 'undefined') {
             if (chartInstanceGlobal) chartInstanceGlobal.destroy();
@@ -661,7 +661,7 @@ function renderMenuManagementTable() {
             <tr>
                 <td><b>${item.name}</b></td>
                 <td>${item.price === 0 ? 'FREE' : 'Rp '+item.price.toLocaleString('id-ID')}</td>
-                <td><span style="color:${item.type==='Complimentary'?'#5856d6':'green'}; font-weight:bold;">${item.type}</span></td>
+                <td><span style="color:${item.type==='Complimentary'?'#5856d6':'var(--pakchill-green-dark, green)'}; font-weight:bold;">${item.type}</span></td>
                 <td>
                     <div style="display:flex; gap:4px;">
                         <button onclick="executeEditMenu(${index})" style="background:#007aff; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Edit</button>
@@ -693,7 +693,7 @@ function renderMemberTable() {
             <tr>
                 <td><b>${m.name}</b></td>
                 <td>${m.wa}</td>
-                <td style="color:#2d5a27; font-weight:bold;">${m.poin} Poin</td>
+                <td style="color:var(--pakchill-green-dark, #2d5a27); font-weight:bold;">${m.poin} Poin</td>
                 <td>
                     <div style="display: flex; gap: 4px;">
                         <button onclick="executeEditMember(${index})" style="background:#007aff; color:white; border:none; padding:3px 6px; border-radius:4px; cursor:pointer;">Edit</button>
