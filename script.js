@@ -1,7 +1,7 @@
 // ==========================================================================
-// 1. ENGINE DATABASE CORE (LOCALSTORAGE RECONCILIATION & AUTO-RESET ORDER #)
+// 1. ENGINE DATABASE CORE (LOCALSTORAGE RECONCILIATION)
 // ==========================================================================
-let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v1.0')) || {
+let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v5.2')) || {
     menu: [
         { id: 'm1', name: 'PACHOY', price: 15000 },
         { id: 'm2', name: 'NANAS', price: 12000 }
@@ -19,24 +19,24 @@ let sysDatabase = JSON.parse(localStorage.getItem('pakchill_enterprise_db_v1.0')
     ],
     transactions: [],
     lastOrderDate: new Date().toDateString(),
-    currentOrderSeq: 101 // Memulai nomor order dari 101
+    currentOrderSeq: 101
 };
 
-// Cek Auto Reset Nomor Orderan jika mendeteksi Hari Berganti
+// Auto Reset Nomor Orderan jika mendeteksi Hari Berganti
 const todayStr = new Date().toDateString();
 if (sysDatabase.lastOrderDate !== todayStr) {
     sysDatabase.currentOrderSeq = 101;
     sysDatabase.lastOrderDate = todayStr;
-    localStorage.setItem('pakchill_enterprise_db_v5.1', JSON.stringify(sysDatabase));
+    localStorage.setItem('pakchill_enterprise_db_v5.2', JSON.stringify(sysDatabase));
 }
 
 let activeRole = null;
 let activeCart = [];
-let activeMemberObj = null;
+let activeMemberObj = null; 
 let chartInstanceGlobal = null;
 
 function saveToStorage() {
-    localStorage.setItem('pakchill_enterprise_db_v5.1', JSON.stringify(sysDatabase));
+    localStorage.setItem('pakchill_enterprise_db_v5.2', JSON.stringify(sysDatabase));
 }
 
 // ==========================================================================
@@ -58,7 +58,7 @@ function executeAuthentication() {
         document.getElementById('txt-nav-role-label').innerText = 'OWNER HUB';
         document.getElementById('badge-status-role').innerText = 'Owner Control';
         document.getElementById('badge-status-role').style.background = '#5856d6';
-        document.getElementById('view-segment-kasir').style.display = 'grid'; // Tetap biarkan kasir terlihat
+        document.getElementById('view-segment-kasir').style.display = 'grid'; 
         document.getElementById('view-segment-owner').style.display = 'block';
         unlockInterface();
         renderOwnerDashboardMetrics();
@@ -76,7 +76,7 @@ function unlockInterface() {
     renderCartUI();
     renderHistoryTable();
     renderMemberTable();
-    calculateLiveClosingDashboard(); // Hitung angka dashboard closing kasir berjalan
+    calculateLiveClosingDashboard();
 }
 
 function triggerSystemLogout() {
@@ -175,12 +175,11 @@ function recalculateCartTotals() {
     if (grandTotal < 0) grandTotal = 0;
 
     document.getElementById('txt-grand-total-display').innerText = 'Rp ' + grandTotal.toLocaleString('id-ID');
-    calculateCashReturn();
     return { subtotal, diskon: nilaiDiskon, voucher: nilaiVoucher, total: grandTotal };
 }
 
 // ==========================================================================
-// 4. METODE BAYAR & REKENING DINAMIS
+// 4. FIX KALKULATOR KEMBALIAN TUNAI & METODE BAYAR
 // ==========================================================================
 function handlePaymentDropdownBranching() {
     const method = document.getElementById('kasir-select-paymethod').value;
@@ -189,13 +188,17 @@ function handlePaymentDropdownBranching() {
     document.getElementById('wrapper-sub-transfer').style.display = (method === 'Transfer') ? 'block' : 'none';
     
     if (method === 'Transfer') populateTransferDropdown();
+    calculateCashReturn();
 }
 
 function calculateCashReturn() {
     const financials = recalculateCartTotals();
-    const uangBayar = parseInt(document.getElementById('kasir-cash-input-uang').value) || 0;
+    const inputUang = document.getElementById('kasir-cash-input-uang').value;
+    const uangBayar = parseInt(inputUang) || 0;
+    
     let kembalian = uangBayar - financials.total;
     if (kembalian < 0) kembalian = 0;
+    
     document.getElementById('cash-return-info').innerText = 'Kembalian: Rp ' + kembalian.toLocaleString('id-ID');
 }
 
@@ -221,7 +224,7 @@ function updateLiveRekeningInfo() {
 }
 
 // ==========================================================================
-// 5. LIVE SEARCH LOYALTY & REVISI PERPINDAHAN PENDAFTARAN MEMBER KE KASIR
+// 5. REVISI: LIVE SEARCH MEMBER & PENDAFTARAN 2 FORM DI KASIR
 // ==========================================================================
 function executeLiveSearchMember() {
     const query = document.getElementById('kasir-search-member').value.trim().toUpperCase();
@@ -233,36 +236,44 @@ function executeLiveSearchMember() {
         return;
     }
 
+    // Otomatis tarik data jika nomor WA atau Nama Member cocok (Mendukung pencarian dinamis)
     activeMemberObj = sysDatabase.members.find(m => m.name.toUpperCase() === query || m.wa === query);
     
     if (activeMemberObj) {
-        infoBox.innerText = `🌟 MEMBER DAPAT: ${activeMemberObj.name} | Poin saat ini: ${activeMemberObj.poin}`;
+        infoBox.innerText = `🌟 MEMBER TERKUNCI: ${activeMemberObj.name} | No WA: ${activeMemberObj.wa} | Poin: ${activeMemberObj.poin}`;
         infoBox.style.color = "#2d5a27";
     } else {
-        infoBox.innerText = "Pelanggan Umum / Member Belum Terdaftar";
+        infoBox.innerText = "Status: Pelanggan Umum (Belum Masuk Member)";
         infoBox.style.color = "#ff9500";
     }
 }
 
 function registerFastMemberFromKasir() {
-    const nama = document.getElementById('kasir-search-member').value.trim();
+    const name = document.getElementById('kasir-fast-name').value.trim();
     const wa = document.getElementById('kasir-fast-wa').value.trim();
 
-    if(!nama || !wa) return alert('Ketik Nama Pelanggan di input pencarian dan isi No WA Baru!');
+    if(!name || !wa) return alert('Mohon lengkapi kedua form: Isi Nama dan No WA Member Baru!');
     
     let exists = sysDatabase.members.some(m => m.wa === wa);
-    if(exists) return alert('Nomor WhatsApp Member sudah terdaftar!');
+    if(exists) return alert('Nomor WhatsApp Member ini sudah pernah terdaftar!');
 
-    sysDatabase.members.push({ name: nama, wa: wa, poin: 0 });
+    const newMember = { name: name.toUpperCase(), wa: wa, poin: 0 };
+    sysDatabase.members.push(newMember);
     saveToStorage();
-    alert(`Sukses Mendaftarkan Member Resmi: ${nama}`);
+    
+    alert(`Sukses! Member Baru Terdaftar:\nNama: ${name.toUpperCase()}\nWA: ${wa}`);
+    
+    // Auto login/tarik langsung ke kolom pencarian kasir setelah sukses daftar
+    document.getElementById('kasir-search-member').value = wa;
+    document.getElementById('kasir-fast-name').value = '';
     document.getElementById('kasir-fast-wa').value = '';
+    
     executeLiveSearchMember();
     renderMemberTable();
 }
 
 // ==========================================================================
-// 6. DASHBOARD CLOSING ENGINE SHIFT KASIR & SINKRONISASI REAL-TIME
+// 6. DASHBOARD CLOSING ENGINE SHIFT KASIR
 // ==========================================================================
 function calculateLiveClosingDashboard() {
     const todayStr = new Date().toDateString();
@@ -276,7 +287,6 @@ function calculateLiveClosingDashboard() {
         totalUang += t.total;
         totalQty += t.itemCount;
         
-        // Memecah teks daftar item untuk merangkum total kuantitas per menu
         if (t.rawItemsArray) {
             t.rawItemsArray.forEach(mName => {
                 menuMap[mName] = (menuMap[mName] || 0) + 1;
@@ -307,7 +317,7 @@ function calculateLiveClosingDashboard() {
 }
 
 // ==========================================================================
-// 7. FINALISASI TRANSAKSI DENGAN NOMOR ORDER URUT DINAMIS
+// 7. FINALISASI PROSES TRANSAKSI & VALIDASI PEMBAYARAN TUNAI
 // ==========================================================================
 function finalizeTransactionReceipt(mode) {
     if (activeCart.length === 0) return alert('Pilih produk di katalog terlebih dahulu!');
@@ -315,22 +325,37 @@ function finalizeTransactionReceipt(mode) {
     const financials = recalculateCartTotals();
     const method = document.getElementById('kasir-select-paymethod').value;
     
-    let poinTambahan = activeCart.length;
+    // Validasi Khusus Pembayaran Cash agar tidak macet/error
+    if (method === 'Cash') {
+        const uangBayar = parseInt(document.getElementById('kasir-cash-input-uang').value) || 0;
+        if (uangBayar < financials.total) {
+            return alert(`Uang pembayaran kurang! Total tagihan adalah Rp ${financials.total.toLocaleString('id-ID')}`);
+        }
+    }
+    
+    // Tambah Poin jika status member aktif terpilih
+    let namaPelangganFix = 'Umum';
     if (activeMemberObj) {
+        namaPelangganFix = activeMemberObj.name;
         let index = sysDatabase.members.findIndex(m => m.wa === activeMemberObj.wa);
-        if(index !== -1) sysDatabase.members[index].poin += poinTambahan;
+        if(index !== -1) {
+            sysDatabase.members[index].poin += activeCart.length; // 1 item = 1 poin
+        }
+    } else {
+        const manualName = document.getElementById('kasir-search-member').value.trim();
+        if (manualName !== "") namaPelangganFix = manualName;
     }
 
     const currentOrderNo = sysDatabase.currentOrderSeq;
     const trxId = 'TRX-' + Date.now();
     
     const newTransaction = {
-        orderNumber: currentOrderNo, // Menyimpan Nomor Orderan Mulai 101
+        orderNumber: currentOrderNo,
         id: trxId,
         timestamp: new Date().toISOString(),
-        customer: activeMemberObj ? activeMemberObj.name : document.getElementById('kasir-search-member').value || 'Umum',
+        customer: namaPelangganFix,
         items: activeCart.map(i => i.name).join(', '),
-        rawItemsArray: activeCart.map(i => i.name), // Digunakan untuk rekap dashboard closing menu
+        rawItemsArray: activeCart.map(i => i.name), 
         itemCount: activeCart.length,
         total: financials.total,
         payment: method,
@@ -338,9 +363,7 @@ function finalizeTransactionReceipt(mode) {
     };
 
     sysDatabase.transactions.push(newTransaction);
-    
-    // Naikkan urutan nomor order untuk pelanggan berikutnya
-    sysDatabase.currentOrderSeq += 1;
+    sysDatabase.currentOrderSeq += 1; // Geser urutan order ke +1
     saveToStorage();
 
     if (mode === 'Print') {
@@ -350,24 +373,27 @@ function finalizeTransactionReceipt(mode) {
         alert(`Transaksi Berhasil Disimpan dengan Nomor Order: ${currentOrderNo}`);
     }
 
-    // Reset Form Kasir
+    // Reset Workspace Kasir ke Kondisi Awal
     activeCart = [];
+    activeMemberObj = null;
     document.getElementById('kasir-input-diskon').value = '0';
     document.getElementById('kasir-input-voucher').value = '0';
     document.getElementById('kasir-search-member').value = '';
     document.getElementById('kasir-cash-input-uang').value = '';
     document.getElementById('kasir-member-status-box').innerText = '';
+    document.getElementById('cash-return-info').innerText = 'Kembalian: Rp 0';
     document.getElementById('txt-live-order-number').innerText = `Order #: ${sysDatabase.currentOrderSeq}`;
     
     renderCartUI();
     calculateLiveClosingDashboard();
+    renderMemberTable();
     if(activeRole === 'owner') renderOwnerDashboardMetrics();
 }
 
 function buildThermalReceiptHTML(trx, financial) {
     const area = document.getElementById('thermal-receipt-output');
     area.innerHTML = `
-        <div style="text-align:center; font-weight:bold;">PAKCHILL POS v5.1</div>
+        <div style="text-align:center; font-weight:bold;">PAKCHILL POS v5.2</div>
         <div style="text-align:center; font-size:10px; font-weight:bold; color:white; background:black; padding:2px; margin:4px 0;">NO ORDER: ${trx.orderNumber}</div>
         <hr style="border-top:1px dashed #000;">
         <div>Nota  : ${trx.id}</div>
@@ -388,22 +414,20 @@ function buildThermalReceiptHTML(trx, financial) {
 }
 
 // ==========================================================================
-// 8. DATA EXPORT HUB AKTIF: DOWNLOAD EXCEL & PDF (KASIR & OWNER)
+// 8. DATA EXPORT HUB AKTIF (KASIR & OWNER)
 // ==========================================================================
-// KASIR - DOWNLOAD PDF
 function exportKasirReportPDF() {
     const element = document.getElementById('closing-report-pdf-area');
     const opt = {
-        margin:       10,
-        filename:     `Laporan-Closing-Kasir-${new Date().toLocaleDateString('id-ID')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        margin: 10,
+        filename: `Laporan-Closing-Kasir-${new Date().toLocaleDateString('id-ID')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
 }
 
-// KASIR - DOWNLOAD EXCEL
 function exportKasirReportExcel() {
     const todayStr = new Date().toDateString();
     const activeTodayTrx = sysDatabase.transactions.filter(t => t.status === 'Sukses' && new Date(t.timestamp).toDateString() === todayStr);
@@ -425,20 +449,18 @@ function exportKasirReportExcel() {
     XLSX.writeFile(workbook, `Excel-Closing-Kasir-${todayStr}.xlsx`);
 }
 
-// OWNER - DOWNLOAD PDF
 function exportOwnerReportPDF() {
     const element = document.getElementById('table-owner-transactions-log');
     const opt = {
-        margin:       8,
-        filename:     `Rekap-Transaksi-Owner-${Date.now()}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2 },
-        jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
+        margin: 8,
+        filename: `Rekap-Transaksi-Owner-${Date.now()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
     };
     html2pdf().set(opt).from(element).save();
 }
 
-// OWNER - DOWNLOAD EXCEL
 function exportOwnerReportExcel() {
     let rowsData = sysDatabase.transactions.map(t => ({
         "No Order": t.orderNumber || '-',
@@ -518,7 +540,6 @@ function renderOwnerDashboardMetrics() {
     renderMemberTable();
 }
 
-// MANAGEMENT FORM ACTIONS BY OWNER
 function saveNewMenuFromOwner() {
     const name = document.getElementById('own-add-menu-name').value.trim().toUpperCase();
     const price = parseInt(document.getElementById('own-add-menu-price').value);
@@ -570,14 +591,31 @@ function saveNewRekeningFromOwner() {
 }
 
 // ==========================================================================
-// 10. RENDER LOG TABLES & KRITIKAL VOID TRANSAKSI
+// 10. RENDER LOG TABLES & REVISI: FITUR HAPUS MEMBER DARI OWNER
 // ==========================================================================
 function renderMemberTable() {
     const tbody = document.getElementById('own-render-member-rows');
     tbody.innerHTML = '';
-    sysDatabase.members.forEach(m => {
-        tbody.innerHTML += `<tr><td><b>${m.name}</b></td><td>${m.wa}</td><td style="color:#2d5a27; font-weight:bold;">${m.poin} Poin</td></tr>`;
+    
+    sysDatabase.members.forEach((m, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td><b>${m.name}</b></td>
+                <td>${m.wa}</td>
+                <td style="color:#2d5a27; font-weight:bold;">${m.poin} Poin</td>
+                <td style="text-align:center;">
+                    <button onclick="executeDeleteMember(${index}, '${m.name}')" style="background:#ff3b30; color:white; border:none; padding:4px 10px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer; width:auto; margin:0;">Hapus</button>
+                </td>
+            </tr>`;
     });
+}
+
+function executeDeleteMember(index, name) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus member "${name}" secara permanen dari sistem?`)) return;
+    
+    sysDatabase.members.splice(index, 1);
+    saveToStorage();
+    renderMemberTable();
 }
 
 function renderHistoryTable() {
@@ -596,7 +634,7 @@ function renderHistoryTable() {
     filtered.forEach(t => {
         let actionButton = '';
         if (activeRole === 'owner' && t.status === 'Sukses') {
-            actionButton = `<button onclick="executeVoidTransaction('${t.id}')" style="background:#ff3b30; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer;">VOID</button>`;
+            actionButton = `<button onclick="executeVoidTransaction('${t.id}')" style="background:#ff3b30; color:white; border:none; padding:4px 8px; font-size:11px; font-weight:bold; border-radius:6px; cursor:pointer; width:auto; margin:0;">VOID</button>`;
         } else if (t.status === 'Voided') {
             actionButton = `<span style="color:#aaa; font-style:italic;">Dibatalkan</span>`;
         }
