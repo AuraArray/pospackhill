@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAKCHILL POS v5.0 - Enterprise Mobile Edition</title>
+    <title>PAKCHILL POS v1.0 - Enterprise Mobile Edition</title>
     
     <link rel="stylesheet" href="style.css">
 
@@ -27,7 +27,7 @@
     <div id="main-app-layer" style="display: none;">
         <nav>
             <div style="font-weight: 900; font-size: 22px; letter-spacing: -0.5px; color: var(--pakchill-green-dark)">
-                PAKCHILL <span style="font-size:12px; font-weight:400; color: var(--pakchill-green-soft)">OWNER APP</span>
+                PAKCHILL <span id="txt-nav-role-label" style="font-size:12px; font-weight:400; color: var(--pakchill-green-soft)">APP</span>
             </div>
             <div style="display: flex; gap: 10px; align-items: center;">
                 <div id="badge-status-role">Staff</div>
@@ -40,14 +40,45 @@
 
             <div id="view-segment-kasir" class="kasir-operational-grid">
                 
-                <div class="ios-panel-card katalog-section-card">
-                    <h3 style="color: var(--pakchill-green-medium); margin-bottom: 10px;">Katalog Produk & Paket Bundling</h3>
-                    <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Pilih menu pesanan pelanggan</p>
-                    <div id="katalog-render-target" class="products-adaptive-grid"></div>
+                <div class="katalog-container-flex">
+                    <div class="ios-panel-card katalog-section-card">
+                        <h3 style="color: var(--pakchill-green-medium); margin-bottom: 10px;">Katalog Produk & Paket Bundling</h3>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Pilih menu pesanan pelanggan</p>
+                        <div id="katalog-render-target" class="products-adaptive-grid"></div>
+                    </div>
+
+                    <div class="ios-panel-card closing-dashboard-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h3 style="color: #ff9500;">Dashboard Closing Kasir (Hari Ini)</h3>
+                                <p style="font-size: 12px; color: #666;">Pantauan omzet shift & kuantitas item terjual berjalan</p>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button onclick="exportKasirReportExcel()" style="width:auto; margin:0; padding:6px 10px; font-size:11px; background:#34c759; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Excel</button>
+                                <button onclick="exportKasirReportPDF()" style="width:auto; margin:0; padding:6px 10px; font-size:11px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">PDF</button>
+                            </div>
+                        </div>
+                        <div class="closing-stats-box" id="closing-report-pdf-area" style="background: white; padding: 15px; border-radius: 14px; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display:flex; justify-content:space-between; font-size:14px; font-weight:bold; margin-bottom:10px; padding-bottom:5px; border-bottom:1px dashed #ddd;">
+                                <span>Total Omzet Penjualan:</span>
+                                <span id="txt-closing-total-omzet" style="color:#34c759;">Rp 0</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:12px;">
+                                <span>Total Kuantitas Terjual:</span>
+                                <span id="txt-closing-total-qty" style="font-weight:bold;">0 Item</span>
+                            </div>
+                            <h5 style="margin-bottom:6px; color:#555; font-size:12px;">Rincian Menu Terjual:</h5>
+                            <div id="closing-menu-list-render" style="font-size:12px; color:#333; display:flex; flex-direction:column; gap:4px;">
+                                </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="ios-panel-card checkout-section-card">
-                    <h3 style="color: var(--pakchill-green-medium); margin-bottom:15px;">Keranjang Belanja</h3>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="color: var(--pakchill-green-medium); margin-bottom:0;">Keranjang Belanja</h3>
+                        <div id="txt-live-order-number" style="background:#ff9500; color:white; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:bold;">Order #: 101</div>
+                    </div>
                     
                     <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #666; padding-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.08);">
                         <span style="width: 45%;">Nama Item</span>
@@ -76,14 +107,17 @@
                     </div>
 
                     <div class="payment-info-box">
-                        <h4 style="font-size:13px; margin-bottom:10px; color: var(--pakchill-green-dark);">Informasi & Pembayaran</h4>
+                        <h4 style="font-size:13px; margin-bottom:10px; color: var(--pakchill-green-dark); font-weight: bold;">Informasi & Pembayaran</h4>
                         
-                        <input type="text" id="kasir-search-member" placeholder="Nama Pelanggan / No WA Member (Wajib)" oninput="executeLiveSearchMember()">
+                        <input type="text" id="kasir-search-member" placeholder="Nama Pelanggan / No WA Member" oninput="executeLiveSearchMember()">
                         <div id="kasir-member-status-box"></div>
 
-                        <div style="display: flex; gap: 8px; margin-top: 5px; margin-bottom: 12px;">
-                            <input type="text" id="kasir-fast-wa" placeholder="No WA Baru" style="margin-bottom:0; font-size:12px; padding:8px;">
-                            <button onclick="registerFastMemberFromKasir()" style="width:auto; margin:0; padding:8px 12px; font-size:12px; background: var(--pakchill-green-soft); color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">+ Member</button>
+                        <div style="background: rgba(0,0,0,0.02); padding: 8px; border-radius: 10px; border: 1px dashed rgba(0,0,0,0.1); margin-top:5px; margin-bottom:12px;">
+                            <p style="font-size:11px; font-weight:bold; color:#555; margin-bottom:5px;">Pendaftaran Member Baru:</p>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="text" id="kasir-fast-wa" placeholder="No WA Baru" style="margin-bottom:0; font-size:12px; padding:6px;">
+                                <button onclick="registerFastMemberFromKasir()" style="width:auto; margin:0; padding:6px 10px; font-size:11px; background: var(--pakchill-green-soft); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">+ Daftar</button>
+                            </div>
                         </div>
 
                         <select id="kasir-select-paymethod" onchange="handlePaymentDropdownBranching()">
@@ -184,7 +218,6 @@
                 <div class="ios-panel-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <h3>Daftar Data Poin Membership Resmi</h3>
-                        <button onclick="registerNewMemberDirectly()" style="width:auto; margin:0; padding:8px 16px; background:#34c759; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">+ Tambah Member Manual</button>
                     </div>
                     <div style="overflow-x:auto;">
                         <table class="ios-table-view">
@@ -196,24 +229,28 @@
                     </div>
                 </div>
 
-                <div class="ios-panel-card">
+                <div class="ios-panel-card" id="owner-report-pdf-area">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                         <h3>Log Transaksi & Saring Otoritas Valid</h3>
-                        <div id="owner-filter-wrapper" style="display:flex; gap:10px; align-items:center;">
-                            <label style="font-size:12px; font-weight:bold; color:#666;">Filter Bulan:</label>
-                            <select id="own-filter-month-select" onchange="renderHistoryTable()" style="width:auto; margin:0; padding:6px 12px; font-size:13px;">
-                                <option value="all">Tampilkan Semua (1 Tahun Penuh)</option>
-                                <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
-                                <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
-                                <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
-                                <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
-                            </select>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <button onclick="exportOwnerReportExcel()" style="width:auto; margin:0; padding:6px 12px; font-size:12px; background:#34c759; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Unduh Excel</button>
+                            <button onclick="exportOwnerReportPDF()" style="width:auto; margin:0; padding:6px 12px; font-size:12px; background:#ff3b30; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Unduh PDF</button>
+                            
+                            <div id="owner-filter-wrapper" style="display:flex; gap:6px; align-items:center; margin-left:10px;">
+                                <select id="own-filter-month-select" onchange="renderHistoryTable()" style="width:auto; margin:0; padding:6px 12px; font-size:13px;">
+                                    <option value="all">Tampilkan Semua (1 Tahun)</option>
+                                    <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+                                    <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+                                    <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+                                    <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div style="overflow-x:auto;">
-                        <table class="ios-table-view">
+                        <table class="ios-table-view" id="table-owner-transactions-log">
                             <thead>
-                                <tr><th>ID Nota</th><th>Waktu Transaksi</th><th>Pelanggan</th><th>Nilai Bersih</th><th>Metode</th><th>Status</th><th>Otoritas</th></tr>
+                                <tr><th>No Order</th><th>ID Nota</th><th>Waktu Transaksi</th><th>Pelanggan</th><th>Nilai Bersih</th><th>Metode</th><th>Status</th><th>Otoritas</th></tr>
                             </thead>
                             <tbody id="own-render-history-rows"></tbody>
                         </table>
