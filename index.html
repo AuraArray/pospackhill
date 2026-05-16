@@ -2,303 +2,299 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PAKCHILL POS v5.2 - Premium Enterprise</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pakchill POS v5.2 - Premium Edition</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="ambient-motion-bg"></div>
-
-    <div id="thermal-receipt-output" class="thermal-print-area"></div>
-
-    <div id="main-app-layer" style="display: none;">
-        <header class="app-header-nav">
-            <div class="header-brand-title">
-                <h2>Selamat Datang Di Mesin Kasir PAKCHILL</h2>
+    <div id="login-screen-overlay" class="login-overlay">
+        <div class="login-card">
+            <div class="login-logo">🥗</div>
+            <h2>PAKCHILL POS <span class="version-tag">v5.2</span></h2>
+            <p>Stay Healthy, Stay Chill bersama Pakchill</p>
+            <div class="form-group">
+                <label for="sys-pin-access">Masukkan PIN Otentikasi</label>
+                <input type="password" id="sys-pin-access" placeholder="••••" maxlength="4" inputmode="numeric">
             </div>
-            <div class="header-status-control">
-                <span id="txt-live-order-number" class="order-seq-badge">Order #: --</span>
+            <button onclick="executeAuthentication()" class="btn-login">Masuk ke Sistem</button>
+            <div class="pin-hint">Kasir: 123 | Owner: 000</div>
+        </div>
+    </div>
+
+    <div id="main-app-layer" class="main-app" style="display: none;">
+        <header class="main-header">
+            <div class="header-left">
+                <h1>Selamat Datang di Pakchill POS</h1>
+                <p id="txt-live-order-number" class="order-seq-badge">Order #: --</p>
+            </div>
+            <div class="header-right">
                 <span id="badge-status-role" class="role-badge">Role</span>
-                <button onclick="triggerSystemLogout()" class="btn-logout-sys">LOGOUT SYSTEM</button>
+                <button onclick="triggerSystemLogout()" class="btn-logout">Keluar</button>
             </div>
         </header>
 
-        <main class="grid-core-layout">
+        <main id="view-segment-kasir" class="kasir-grid" style="display: none;">
             
-            <section id="view-segment-kasir" class="kasir-workspace-grid" style="display: none;">
-                <div class="katalog-panel-container">
-                    <h3 class="panel-section-title">🥗 KATALOG MENU UTAMA</h3>
-                    <div id="katalog-render-target" class="products-grid-feed">
-                        </div>
+            <section class="catalog-section">
+                <div class="section-title">
+                    <h3>Katalog Menu Pakchill</h3>
                 </div>
+                <div id="katalog-render-target" class="catalog-grid">
+                    </div>
+            </section>
 
-                <div class="terminal-panel-container">
-                    <h3 class="panel-section-title">🛒 KERANJANG BELANJA</h3>
-                    
-                    <div id="cart-items-wrapper" class="cart-items-scrollbox"></div>
-
-                    <div class="member-loyalty-widget">
-                        <h4>🎯 Loyalty Membership</h4>
-                        <input type="text" id="kasir-search-member" placeholder="Cari Nama / No WhatsApp Member..." oninput="executeLiveSearchMember()">
-                        <div id="kasir-member-status-box" class="member-status-feedback"></div>
-                        
-                        <div class="fast-register-member-form">
-                            <input type="text" id="kasir-fast-name" placeholder="Nama Member Baru">
-                            <input type="number" id="kasir-fast-wa" placeholder="No WhatsApp">
-                            <button onclick="registerFastMemberFromKasir()">+ Daftarkan Member</button>
-                        </div>
+            <section class="cart-section">
+                <div class="section-title">
+                    <h3>Keranjang Belanja</h3>
+                </div>
+                
+                <div id="cart-items-wrapper" class="cart-wrapper">
                     </div>
 
-                    <div class="discount-calculator-box">
-                        <div class="input-field-group">
-                            <label>Kode Diskon (Persen/Manual)</label>
+                <div class="billing-summary">
+                    <div class="bill-row">
+                        <span>Subtotal</span>
+                        <span id="txt-subtotal-val">Rp 0</span>
+                    </div>
+                    <div class="bill-row grid-inputs">
+                        <div>
+                            <label>Diskon (Rp/Kode)</label>
                             <input type="text" id="kasir-input-diskon" value="0" oninput="recalculateCartTotals()">
                         </div>
-                        <div class="input-field-group">
-                            <label>Kode Voucher (Nominal Potongan)</label>
+                        <div>
+                            <label>Voucher (Rp/Kode)</label>
                             <input type="text" id="kasir-input-voucher" value="0" oninput="recalculateCartTotals()">
                         </div>
                     </div>
+                    <div class="bill-row total-row">
+                        <span>GRAND TOTAL</span>
+                        <span id="txt-grand-total-display">Rp 0</span>
+                    </div>
+                </div>
 
-                    <div class="billing-summary-card">
-                        <div class="bill-row"><span>Subtotal</span><span id="txt-subtotal-val">Rp 0</span></div>
-                        <div class="bill-row grand-total-row"><span>GRAND TOTAL</span><span id="txt-grand-total-display">Rp 0</span></div>
-                        
-                        <div class="payment-selection-wrapper">
-                            <label>Metode Pembayaran</label>
-                            <select id="kasir-select-paymethod" onchange="handlePaymentDropdownBranching()">
-                                <option value="Cash">Tunai (Cash)</option>
-                                <option value="QRIS">QRIS Digital</option>
-                                <option value="Transfer">Transfer Bank / E-Wallet</option>
+                <div class="payment-method-area">
+                    <label for="kasir-select-paymethod">Metode Pembayaran</label>
+                    <select id="kasir-select-paymethod" onchange="handlePaymentDropdownBranching()">
+                        <option value="Cash">Tunai (Cash)</option>
+                        <option value="QRIS">QRIS</option>
+                        <option value="Transfer">Transfer Bank / E-Wallet</option>
+                    </select>
+
+                    <div id="wrapper-sub-cash" class="sub-pay-panel">
+                        <label for="kasir-cash-input-uang">Uang Diterima (Rp)</label>
+                        <input type="number" id="kasir-cash-input-uang" placeholder="Masukkan nominal" oninput="calculateCashReturn()">
+                        <div id="cash-return-info" class="return-badge">Kembalian: Rp 0</div>
+                    </div>
+
+                    <div id="wrapper-sub-qris" class="sub-pay-panel" style="display: none;">
+                        <div class="qris-container">
+                            <p>Silakan Scan QRIS Pakchill di bawah ini:</p>
+                            <img src="qris-pakchill.png" alt="QRIS Pakchill" class="qris-image">
+                            <select id="kasir-select-vendor-qris">
+                                <option value="Mandiri">Mandiri QRIS</option>
+                                <option value="ShopeePay">ShopeePay</option>
                             </select>
                         </div>
+                    </div>
 
-                        <div id="wrapper-sub-cash" class="payment-sub-branch">
-                            <input type="number" id="kasir-cash-input-uang" placeholder="Masukkan Jumlah Uang Tunai..." oninput="calculateCashReturn()">
-                            <div id="cash-return-info" class="cashback-notice">Kembalian: Rp 0</div>
-                        </div>
-
-                        <div id="wrapper-sub-qris" class="payment-sub-branch" style="display: none;">
-                            <select id="kasir-select-qris-vendor">
-                                <option value="Mandiri">QRIS Mandiri</option>
-                                <option value="ShopeePay">QRIS ShopeePay</option>
+                    <div id="wrapper-sub-transfer" class="sub-pay-panel" style="display: none;">
+                        <label for="sub-target-transfer">Pilih Rekening Tujuan</label>
+                        <select id="sub-target-transfer" onchange="updateLiveRekeningInfo()">
                             </select>
-                            <div class="qris-image-container">
-                                <img src="qris-pakchill.png" alt="QRIS Pakchill Official">
+                        <div id="live-rekening-info-box" class="rekening-info-box">
                             </div>
-                        </div>
+                    </div>
+                </div>
 
-                        <div id="wrapper-sub-transfer" class="payment-sub-branch" style="display: none;">
-                            <select id="sub-target-transfer" onchange="updateLiveRekeningInfo()">
-                                </select>
-                            <div id="live-rekening-info-box" class="live-bank-notice-card"></div>
-                        </div>
+                <div class="member-kasir-area">
+                    <label for="kasir-search-member">Cari Member (Nama/WA)</label>
+                    <input type="text" id="kasir-search-member" placeholder="Ketik nama atau No WA..." oninput="executeLiveSearchMember()">
+                    <div id="kasir-member-status-box" class="member-status-lbl"></div>
 
-                        <div class="checkout-actions-container">
-                            <button onclick="finalizeTransactionReceipt('Save')" class="btn-action-save">Simpan Transaksi</button>
-                            <button onclick="finalizeTransactionReceipt('Print')" class="btn-action-print">Cetak Struk Thermal 🧾</button>
+                    <div class="fast-member-box">
+                        <h4>Daftar Member Cepat</h4>
+                        <div class="fast-inputs">
+                            <input type="text" id="kasir-fast-name" placeholder="Nama">
+                            <input type="text" id="kasir-fast-wa" placeholder="No WA (e.g. 0812)">
+                            <button onclick="registerFastMemberFromKasir()">+</button>
                         </div>
                     </div>
+                </div>
 
-                    <div id="closing-report-pdf-area" class="closing-shift-widget">
-                        <h4>📋 Laporan Closing Shift Kasir (24 Jam)</h4>
-                        <div class="closing-metrics-grid">
-                            <div class="closing-card"><h5>Total Omzet</h5><span id="txt-closing-total-omzet">Rp 0</span></div>
-                            <div class="closing-card"><h5>Kuantitas Terjual</h5><span id="txt-closing-total-qty">0 Item</span></div>
-                        </div>
-                        <div class="closing-menu-breakdown">
-                            <h5>Menu Terjual Hari Ini:</h5>
-                            <div id="closing-menu-list-render" class="closing-list-box"></div>
-                        </div>
-                        <div class="export-buttons-group">
-                            <button onclick="exportKasirReportPDF()" class="btn-pdf">Export PDF</button>
-                            <button onclick="exportKasirReportExcel()" class="btn-excel">Export Excel</button>
-                        </div>
-                    </div>
-
+                <div class="action-buttons-group">
+                    <button onclick="finalizeTransactionReceipt('Direct')" class="btn-action btn-success">Simpan Transaksi</button>
+                    <button onclick="finalizeTransactionReceipt('Print')" class="btn-action btn-print">Simpan & Cetak Struk</button>
                 </div>
             </section>
 
-            <section id="view-segment-owner" class="owner-hub-dashboard" style="display: none;">
-                <h3 class="owner-hub-title">🛡️ OWNER ENTERPRISE HUB</h3>
-                
-                <div class="owner-metrics-grid">
-                    <div class="metric-card"><h4>Omzet Hari Ini</h4><span id="own-rekap-hari">Rp 0</span></div>
-                    <div class="metric-card"><h4>7 Hari Terakhir</h4><span id="own-rekap-minggu">Rp 0</span></div>
-                    <div class="metric-card"><h4>Omzet Bulan Ini</h4><span id="own-rekap-bulan">Rp 0</span></div>
-                    <div class="metric-card"><h4>Total Tahun Ini</h4><span id="own-rekap-tahun">Rp 0</span></div>
+            <section id="closing-report-pdf-area" class="closing-section" style="grid-column: 1 / -1;">
+                <div class="section-title">
+                    <h3>Laporan Ringkas Closing Shift (Hari Ini)</h3>
                 </div>
-
-                <div class="chart-visualization-container">
-                    <h4>📊 Grafik Tren Omzet Penjualan Bulanan (Januari - Desember)</h4>
-                    <div class="canvas-wrapper">
-                        <canvas id="canvasTrenOwner"></canvas>
+                <div class="closing-dashboard-grid">
+                    <div class="metric-card card-green">
+                        <h4>Total Omzet Terjual</h4>
+                        <p id="txt-closing-total-omzet">Rp 0</p>
+                    </div>
+                    <div class="metric-card card-orange">
+                        <h4>Kuantitas Produk Terjual</h4>
+                        <p id="txt-closing-total-qty">0 Item</p>
+                    </div>
+                    <div class="metric-card card-white">
+                        <h4>Rincian Menu Populer</h4>
+                        <div id="closing-menu-list-render" class="closing-menu-list">
+                            </div>
                     </div>
                 </div>
-
-                <div class="owner-management-accordion-grid">
-                    
-                    <div class="management-card-form">
-                        <h4>🥗 Manajemen Produk & Paket</h4>
-                        
-                        <div class="sub-form-block">
-                            <h5>+ Tambah Menu Baru</h5>
-                            <input type="text" id="own-add-menu-name" placeholder="Nama Menu Baru">
-                            <input type="number" id="own-add-menu-price" placeholder="Harga Jual (Rp)">
-                            <select id="own-add-menu-type">
-                                <option value="Reguler">Produk Reguler</option>
-                                <option value="Complimentary">Complimentary (Gratis/Bonus)</option>
-                            </select>
-                            <button onclick="saveNewMenuFromOwner()">Simpan Menu</button>
-                        </div>
-
-                        <div class="sub-form-block" style="margin-top: 15px;">
-                            <h5>+ Racik Paket Bundling Hemat</h5>
-                            <input type="text" id="own-add-bundle-name" placeholder="Nama Paket (Contoh: Sehat Mantap)">
-                            <input type="number" id="own-add-bundle-price" placeholder="Harga Promo Paket (Rp)">
-                            <button onclick="saveNewBundleFromOwner()">Aktifkan Paket</button>
-                        </div>
-
-                        <div class="table-scroll-container" style="margin-top: 15px;">
-                            <h5>Daftar Menu & Komplimenter Aktif</h5>
-                            <table class="owner-data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nama Item</th>
-                                        <th>Harga</th>
-                                        <th>Tipe</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="own-render-menu-rows"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="management-card-form">
-                        <h4>💳 Pusat Manajemen Rekening & E-Wallet</h4>
-                        <div class="sub-form-block">
-                            <h5>+ Daftarkan Akun Pembayaran</h5>
-                            <select id="own-rek-bankname">
-                                <option value="BCA">Bank BCA</option>
-                                <option value="Mandiri">Bank Mandiri</option>
-                                <option value="Jago">Bank Jago</option>
-                                <option value="GoPay">GoPay</option>
-                                <option value="Dana">Dana</option>
-                                <option value="ShopeePay">ShopeePay</option>
-                            </select>
-                            <input type="text" id="own-rek-number" placeholder="Nomor Rekening / Nomor HP E-Wallet">
-                            <input type="text" id="own-rek-holder" placeholder="Atas Nama (A/N) Pemilik Rekening">
-                            <button onclick="saveNewRekeningFromOwner()">Daftarkan Akun</button>
-                        </div>
-
-                        <div class="table-scroll-container" style="margin-top: 15px;">
-                            <table class="owner-data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Vendor/Bank</th>
-                                        <th>Nomor Akun</th>
-                                        <th>Atas Nama (A/N)</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="own-render-rekening-rows"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="management-card-form">
-                        <h4>🎫 Manajemen Voucher & Diskon</h4>
-                        <div class="sub-form-block">
-                            <input type="text" id="own-vch-code" placeholder="Kode Unik (Contoh: PAKCHILLSEHAT)">
-                            <input type="number" id="own-vch-nominal" placeholder="Nominal Potongan (Rp)">
-                            <select id="own-vch-type">
-                                <option value="Voucher">Voucher (Potong Total)</option>
-                                <option value="Diskon">Diskon Manual</option>
-                            </select>
-                            <button onclick="saveNewVoucherFromOwner()">Daftarkan Voucher</button>
-                        </div>
-                    </div>
-
-                    <div class="management-card-form" style="grid-column: span 2;">
-                        <h4>👥 Database Membership Pelanggan</h4>
-                        <div class="table-scroll-container">
-                            <table class="owner-data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Nama Member</th>
-                                        <th>Nomor WhatsApp</th>
-                                        <th>Akumulasi Poin</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="own-render-member-rows"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
+                <div class="export-buttons">
+                    <button onclick="exportKasirReportPDF()" class="btn-export pdf">Export PDF Closing</button>
+                    <button onclick="exportKasirReportExcel()" class="btn-export excel">Export Excel Closing</button>
                 </div>
+            </section>
+        </main>
 
-                <div class="owner-log-transactions-panel" style="margin-top: 25px;">
-                    <div class="log-panel-header">
-                        <h4>📋 Master Log Histori Transaksi (1 Tahun Terakhir)</h4>
-                        <div class="filter-actions-group">
-                            <select id="own-filter-month-select" onchange="renderHistoryTable()">
-                                <option value="all">Semua Bulan</option>
-                                <option value="0">Januari</option><option value="1">Februari</option>
-                                <option value="2">Maret</option><option value="3">April</option>
-                                <option value="4">Mei</option><option value="5">Juni</option>
-                                <option value="6">Juli</option><option value="7">Agustus</option>
-                                <option value="8">September</option><option value="9">Oktober</option>
-                                <option value="10">November</option><option value="11">Desember</option>
-                            </select>
-                            <button onclick="exportOwnerReportPDF()" class="btn-pdf">Export PDF Log</button>
-                            <button onclick="exportOwnerReportExcel()" class="btn-excel">Export Excel Master</button>
-                        </div>
+        <div id="view-segment-owner" class="owner-layer" style="display: none;">
+            <hr class="owner-divider">
+            <h2 class="owner-section-title">🛡️ Owner Dashboard & Enterprise Control Center</h2>
+            
+            <section class="owner-metrics-grid">
+                <div class="metric-card">
+                    <h4>Omzet Hari Ini</h4>
+                    <p id="own-rekap-hari">Rp 0</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Omzet 7 Hari Terakhir</h4>
+                    <p id="own-rekap-minggu">Rp 0</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Omzet Bulan Ini</h4>
+                    <p id="own-rekap-bulan">Rp 0</p>
+                </div>
+                <div class="metric-card">
+                    <h4>Omzet Tahun Ini</h4>
+                    <p id="own-rekap-tahun">Rp 0</p>
+                </div>
+            </section>
+
+            <section class="chart-section-owner">
+                <h3>Tren Pertumbuhan Penjualan Tahunan</h3>
+                <div class="chart-container">
+                    <canvas id="canvasTrenOwner"></canvas>
+                </div>
+            </section>
+
+            <div class="owner-crud-grid">
+                <div class="crud-card">
+                    <h3>Kelola Produk & Complimentary</h3>
+                    <div class="crud-form">
+                        <input type="text" id="own-add-menu-name" placeholder="Nama Menu (e.g. PAKCHOY PINEAPPLE)">
+                        <input type="number" id="own-add-menu-price" placeholder="Harga Jual (Rp)">
+                        <select id="own-add-menu-type">
+                            <option value="Reguler">Menu Reguler</option>
+                            <option value="Complimentary">Complimentary (Bonus/FREE)</option>
+                        </select>
+                        <button onclick="saveNewMenuFromOwner()" class="btn-crud-submit">Daftarkan Menu</button>
                     </div>
-                    <div class="table-scroll-container">
-                        <table id="table-owner-transactions-log" class="owner-data-table">
+                    <div class="crud-form bndl-margin">
+                        <input type="text" id="own-add-bundle-name" placeholder="Nama Paket Bundling">
+                        <input type="number" id="own-add-bundle-price" placeholder="Harga Paket (Rp)">
+                        <button onclick="saveNewBundleFromOwner()" class="btn-crud-submit btn-orange">Aktifkan Paket</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
                             <thead>
-                                <tr>
-                                    <th>Order #</th>
-                                    <th>ID Nota</th>
-                                    <th>Waktu Transaksi</th>
-                                    <th>Nama Pelanggan</th>
-                                    <th>Total Bersih</th>
-                                    <th>Metode</th>
-                                    <th>Status Validasi</th>
-                                    <th>Aksi</th>
-                                </tr>
+                                <tr><th>Nama Item</th><th>Harga</th><th>Tipe</th><th>Aksi</th></tr>
                             </thead>
-                            <tbody id="own-render-history-rows"></tbody>
+                            <tbody id="own-render-menu-rows"></tbody>
                         </table>
                     </div>
                 </div>
 
-            </section>
-        </main>
-    </div>
+                <div class="crud-card">
+                    <h3>Kelola Rekening Bank / E-Wallet</h3>
+                    <div class="crud-form">
+                        <select id="own-rek-bankname">
+                            <option value="BCA">Bank BCA</option>
+                            <option value="Mandiri">Bank Mandiri</option>
+                            <option value="Bank Jago">Bank Jago</option>
+                            <option value="GoPay">GoPay</option>
+                            <option value="Dana">Dana</option>
+                            <option value="ShopeePay">ShopeePay</option>
+                        </select>
+                        <input type="text" id="own-rek-number" placeholder="Nomor Rekening / HP">
+                        <input type="text" id="own-rek-holder" placeholder="Atas Nama (A/N)">
+                        <button onclick="saveNewRekeningFromOwner()" class="btn-crud-submit">Simpan Akun Pembayaran</button>
+                    </div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr><th>Bank/Platform</th><th>No Rekening</th><th>Atas Nama</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="own-render-rekening-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
 
-    <div id="login-screen-overlay" class="login-wrapper-layer">
-        <div class="login-premium-card">
-            <div class="logo-pakchill-container">
-                <img src="logo-pakchill.png" alt="PAKCHILL LOGO" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <span class="logo-fallback-text" style="display:none; font-weight:bold; color:white; font-size:12px; text-align:center;">PAKCHILL<br>LOGO</span>
+                <div class="crud-card">
+                    <h3>Sistem Voucher & Promosi</h3>
+                    <div class="crud-form">
+                        <input type="text" id="own-vch-code" placeholder="KODE VOUCHER (e.g. SEHAT)">
+                        <input type="number" id="own-vch-nominal" placeholder="Nominal Potongan (Rp)">
+                        <select id="own-vch-type">
+                            <option value="Diskon">Potongan Langsung Diskon</option>
+                            <option value="Voucher">Potongan Kupon Voucher</option>
+                        </select>
+                        <button onclick="saveNewVoucherFromOwner()" class="btn-crud-submit">Rilis Voucher</button>
+                    </div>
+                </div>
+
+                <div class="crud-card">
+                    <h3>Database Member Terdaftar</h3>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr><th>Nama Member</th><th>No WhatsApp</th><th>Akumulasi Poin</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="own-render-member-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            
-            <h3>ENTERPRISE GATEWAY</h3>
-            <p style="font-size: 11px; color: #eee; margin-bottom: 15px; letter-spacing: 1px;">SISTEM KASIR PAKCHILL POS v5.2</p>
-            
-            <div class="login-input-box">
-                <input type="password" id="sys-pin-access" placeholder="MASUKKAN PIN" maxlength="6" autofocus>
-                <button onclick="executeAuthentication()" class="btn-login-submit">AKSES SISTEM</button>
-            </div>
+
+            <section id="table-owner-transactions-log" class="master-log-section">
+                <div class="section-title-flex">
+                    <h3>Master Log Audit Transaksi</h3>
+                    <select id="own-filter-month-select" onchange="renderHistoryTable()">
+                        <option value="all">Semua Bulan</option>
+                        <option value="0">Januari</option><option value="1">Februari</option>
+                        <option value="2">Maret</option><option value="3">April</option>
+                        <option value="4">Mei</option><option value="5">Juni</option>
+                        <option value="6">Juli</option><option value="7">Agustus</option>
+                        <option value="8">September</option><option value="9">Oktober</option>
+                        <option value="10">November</option><option value="11">Desember</option>
+                    </select>
+                </div>
+                <div class="table-scroll-master">
+                    <table>
+                        <thead>
+                            <tr><th>Order #</th><th>ID Transaksi</th><th>Waktu</th><th>Pelanggan</th><th>Total Tagihan</th><th>Metode</th><th>Status</th><th>Otoritas</th></tr>
+                        </thead>
+                        <tbody id="own-render-history-rows"></tbody>
+                    </table>
+                </div>
+                <div class="export-buttons">
+                    <button onclick="exportOwnerReportPDF()" class="btn-export pdf">Export Master PDF</button>
+                    <button onclick="exportOwnerReportExcel()" class="btn-export excel">Export Master Excel</button>
+                </div>
+            </section>
         </div>
     </div>
+
+    <div id="thermal-receipt-output" class="thermal-print-area"></div>
 
 </body>
 </html>
