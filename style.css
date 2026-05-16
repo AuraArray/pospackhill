@@ -1,11 +1,14 @@
+/* ==========================================================================
+   PAKCHILL ENTERPRISE BRAND IDENTITIES & CORE STYLES
+   ========================================================================== */
 :root {
-    --pakchill-green-dark: #1e3f1b;
-    --pakchill-green-medium: #2d5a27;
-    --pakchill-green-soft: #478241;
-    --pakchill-light-bg: rgba(255, 255, 255, 0.85);
-    --ios-blur: blur(25px);
-    --shadow-premium: 0 10px 40px rgba(30, 63, 27, 0.07);
-    --border-ios: 1px solid rgba(255, 255, 255, 0.5);
+    --pakchill-green-dark: #2d5a27;
+    --pakchill-green-soft: #428238;
+    --pakchill-green-light: #eaf4e8;
+    --pakchill-gold: #ff9500;
+    --pakchill-crimson: #ff3b30;
+    --pakchill-glass: rgba(255, 255, 255, 0.85);
+    --radius-premium: 12px;
 }
 
 * {
@@ -16,235 +19,368 @@
 }
 
 body {
-    min-height: 100vh;
-    background: linear-gradient(-45deg, #e4f0e2, #cbdcc8, #b8dbb4, #f2f7f1);
-    background-size: 400% 400%;
-    animation: ambientFluidMotion 14s ease infinite;
-    color: #1c1c1e;
+    background-color: #f4f7f3;
     overflow-x: hidden;
+    color: #333;
 }
 
-@keyframes ambientFluidMotion {
+/* BACKGROUND AMBIENT MOTION ANIMATION */
+.ambient-motion-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -2;
+    background: linear-gradient(135deg, #e2f0df 0%, #fdfbf7 50%, #d5ebd0 100%);
+    background-size: 400% 400%;
+    animation: flowAmbientGradient 25s ease infinite;
+}
+
+@keyframes flowAmbientGradient {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-nav {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: var(--ios-blur);
-    -webkit-backdrop-filter: var(--ios-blur);
-    padding: 12px 4%;
+/* APP LAYER NAVIGATION */
+.app-header-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: var(--border-ios);
+    background: var(--pakchill-glass);
+    backdrop-filter: blur(10px);
+    padding: 15px 25px;
+    border-bottom: 2px solid rgba(45, 90, 39, 0.15);
     position: sticky;
-    top: 0;
-    z-index: 100;
+    top: 0; z-index: 100;
 }
 
-#badge-status-role {
-    background: var(--pakchill-green-dark);
-    color: white;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-}
-
-.logout-btn {
-    width: auto !important;
-    margin: 0 !important;
-    padding: 6px 14px !important;
-    background: #ff3b30 !important;
-    color: white !important;
-    border: none !important;
-    font-weight: bold;
-    border-radius: 10px !important;
-    cursor: pointer;
-}
-
-.workspace-container {
-    padding: 20px 3%;
-    width: 100%;
-}
-
-.main-welcome-title {
-    font-size: 24px;
+.header-brand-title h2 {
+    font-size: 20px;
     font-weight: 800;
     color: var(--pakchill-green-dark);
-    margin-bottom: 20px;
     letter-spacing: -0.5px;
 }
 
-.kasir-operational-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 20px;
-    align-items: start;
-}
-
-.katalog-container-flex {
+.header-status-control {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.order-seq-badge {
+    background: #000; color: #fff;
+    padding: 5px 12px; font-weight: 900;
+    font-size: 13px; border-radius: 6px;
+}
+
+.role-badge {
+    color: #fff; padding: 5px 12px;
+    font-weight: 700; font-size: 12px;
+    border-radius: 6px; text-transform: uppercase;
+}
+
+.btn-logout-sys {
+    background: var(--pakchill-crimson); color: white;
+    border: none; padding: 6px 12px; font-weight: bold;
+    border-radius: 6px; cursor: pointer; font-size: 12px;
+}
+
+/* GRID OPERASIONAL UTAMA */
+.grid-core-layout {
+    padding: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.panel-section-title {
+    font-size: 15px; color: var(--pakchill-green-dark);
+    font-weight: 800; margin-bottom: 12px;
+    border-left: 4px solid var(--pakchill-green-dark);
+    padding-left: 8px; text-transform: uppercase;
+}
+
+/* TERMINAL WORKSPACE KASIR LAYOUT Side-by-Side */
+.kasir-workspace-grid {
+    display: grid;
+    grid-template-columns: 1fr 420px;
     gap: 20px;
 }
 
-.ios-panel-card {
-    background: var(--pakchill-light-bg);
-    backdrop-filter: var(--ios-blur);
-    -webkit-backdrop-filter: var(--ios-blur);
-    border-radius: 24px;
-    padding: 22px;
-    box-shadow: var(--shadow-premium);
-    border: var(--border-ios);
-    margin-bottom: 20px;
+.katalog-panel-container, .terminal-panel-container {
+    background: var(--pakchill-glass);
+    border-radius: var(--radius-premium);
+    padding: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+    border: 1px solid rgba(255,255,255,0.7);
 }
 
-.products-adaptive-grid {
+/* GRID KATALOG FEED */
+.products-grid-feed {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 14px;
-}
-
-@media (max-width: 850px) {
-    .kasir-operational-grid { grid-template-columns: 1fr; }
-    .katalog-container-flex { order: 1; }
-    .checkout-section-card { order: 2; }
-    .products-adaptive-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    .main-welcome-title { font-size: 20px; }
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
 }
 
 .product-item-card {
-    background: white;
-    padding: 18px 12px;
-    border-radius: 20px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.03);
-    transition: all 0.2s ease;
+    background: #ffffff;
+    border-radius: 10px; padding: 15px;
+    text-align: center; cursor: pointer;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.product-item-card:active { transform: scale(0.95); }
+.product-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(45,90,39,0.1);
+}
 
 .badge-bundling-tag {
-    position: absolute;
-    top: 0; left: 0;
-    background: #ff9500; color: white;
-    font-size: 9px; font-weight: 800;
-    padding: 3px 9px; border-bottom-right-radius: 12px;
-    text-transform: uppercase; letter-spacing: 0.5px;
+    position: absolute; top: 0; left: 0;
+    background: var(--pakchill-gold); color: white;
+    font-size: 9px; font-weight: 900;
+    padding: 2px 8px; border-bottom-right-radius: 8px;
+    text-transform: uppercase;
 }
 
-#cart-items-wrapper {
-    min-height: 80px;
-    max-height: 240px;
-    overflow-y: auto;
-    margin-bottom: 15px;
+.badge-complimentary-tag {
+    position: absolute; top: 0; left: 0;
+    background: #5856d6; color: white;
+    font-size: 9px; font-weight: 900;
+    padding: 2px 8px; border-bottom-right-radius: 8px;
+    text-transform: uppercase;
+}
+
+/* KERANJANG & BILLING AREA */
+.cart-items-scrollbox {
+    max-height: 240px; overflow-y: auto;
+    background: rgba(0,0,0,0.02);
+    border-radius: 8px; padding: 10px; margin-bottom: 15px;
 }
 
 .cart-item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
 }
 
-.cost-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-weight: 500;
+.member-loyalty-widget, .discount-calculator-box, .closing-shift-widget {
+    background: rgba(45,90,39,0.04); border-radius: 8px;
+    padding: 12px; margin-bottom: 15px;
+    border: 1px solid rgba(45,90,39,0.05);
 }
 
-.input-inline-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 6px;
+.member-loyalty-widget h4, .closing-shift-widget h4 {
+    font-size: 13px; font-weight: 800; color: var(--pakchill-green-dark); margin-bottom: 8px;
 }
 
-.input-inline-row label { font-size: 13px; color: #555; }
-.input-inline-row input { width: 120px !important; margin-bottom: 0 !important; padding: 6px 10px !important; text-align: right; font-size: 14px; }
-
-.total-tagihan-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 15px 0 5px 0;
-    padding: 12px;
-    background: rgba(45, 90, 39, 0.07);
-    border-radius: 14px;
-    font-weight: 800; font-size: 16px;
+.fast-register-member-form {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;
 }
 
-#txt-grand-total-display { color: var(--pakchill-green-dark); font-size: 19px; }
-
-.payment-info-box {
-    background: rgba(255,255,255,0.5);
-    border: 1px solid rgba(0,0,0,0.05);
-    padding: 12px;
-    border-radius: 16px;
-    margin-bottom: 15px;
+.fast-register-member-form button {
+    grid-column: span 2; background: var(--pakchill-green-dark);
+    color: white; border: none; padding: 5px; font-size: 11px;
+    font-weight: bold; border-radius: 4px; cursor: pointer;
 }
 
-#kasir-member-status-box { font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+.discount-calculator-box {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
 
-#login-screen-overlay {
+.input-field-group label {
+    font-size: 10px; font-weight: 700; color: #555; display: block; margin-bottom: 3px;
+}
+
+input, select {
+    width: 100%; padding: 8px 10px; font-size: 13px;
+    border: 1px solid #ccc; border-radius: 6px; background: #fff;
+}
+
+input:focus, select:focus {
+    outline: none; border-color: var(--pakchill-green-dark);
+}
+
+.billing-summary-card {
+    background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px; padding: 15px;
+}
+
+.bill-row {
+    display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;
+}
+
+.grand-total-row {
+    font-size: 18px; font-weight: 900; color: var(--pakchill-green-dark);
+    border-top: 2px dashed #eee; padding-top: 8px; margin-top: 5px;
+}
+
+.payment-selection-wrapper { margin: 12px 0; }
+.payment-selection-wrapper label { font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; }
+
+.payment-sub-branch {
+    background: #fdfaf2; border-radius: 6px; padding: 10px;
+    margin-bottom: 12px; border: 1px solid rgba(255,149,0,0.15);
+}
+
+.qris-image-container {
+    text-align: center; margin-top: 8px;
+}
+
+.qris-image-container img {
+    width: 100%; max-width: 200px; height: auto; border-radius: 6px;
+}
+
+.live-bank-notice-card {
+    font-size: 12px; font-weight: bold; color: var(--pakchill-green-dark);
+    margin-top: 6px; background: #eaf4e8; padding: 6px; border-radius: 4px;
+}
+
+.checkout-actions-container {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
+}
+
+.checkout-actions-container button {
+    padding: 10px; font-size: 12px; font-weight: 900; border: none;
+    border-radius: 6px; cursor: pointer; text-transform: uppercase;
+}
+
+.btn-action-save { background: #e2e2e7; color: #333; }
+.btn-action-print { background: var(--pakchill-green-dark); color: white; }
+
+/* REKAP CLOSING */
+.closing-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.closing-card { background: white; padding: 8px; border-radius: 6px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+.closing-card h5 { font-size: 10px; color: #666; }
+.closing-card span { font-size: 13px; font-weight: bold; color: #000; }
+.closing-menu-breakdown h5 { font-size: 11px; margin: 8px 0 4px 0; }
+.closing-list-box { max-height: 100px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+
+.export-buttons-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+.export-buttons-group button, .filter-actions-group button {
+    border: none; padding: 6px; font-size: 11px; font-weight: bold; border-radius: 5px; cursor: pointer; color: white;
+}
+.btn-pdf { background: #ff3b30; }
+.btn-excel { background: #34c759; }
+
+/* ==========================================================================
+   OWNER INNER AREA HUB STYLES
+   ========================================================================== */
+.owner-hub-dashboard {
+    background: var(--pakchill-glass); border-radius: var(--radius-premium);
+    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+.owner-hub-title { font-size: 18px; font-weight: 900; color: #5856d6; margin-bottom: 18px; }
+
+.owner-metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;
+}
+
+.metric-card {
+    background: #ffffff; padding: 18px; border-radius: 10px;
+    border-left: 5px solid #5856d6; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+.metric-card h4 { font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+.metric-card span { font-size: 20px; font-weight: 900; color: #1c1c1e; }
+
+.chart-visualization-container {
+    background: #ffffff; padding: 18px; border-radius: 12px; margin-bottom: 25px;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.canvas-wrapper { position: relative; height: 260px; width: 100%; }
+
+.owner-management-accordion-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+
+.management-card-form {
+    background: #ffffff; padding: 18px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+.management-card-form h4 { font-size: 14px; font-weight: 800; color: #1c1c1e; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
+.sub-form-block h5 { font-size: 12px; color: #555; margin-bottom: 5px; }
+.sub-form-block input, .sub-form-block select { margin-bottom: 6px; }
+.sub-form-block button {
+    background: #5856d6; color: white; border: none; padding: 8px;
+    font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%; font-size: 12px;
+}
+
+/* DATA TABLE CONFIG */
+.table-scroll-container { max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
+.owner-data-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;
+}
+
+.owner-data-table th {
+    background: #f5f5f7; padding: 10px; font-weight: 700; color: #333; position: sticky; top: 0; z-index: 2;
+}
+
+.owner-data-table td { padding: 10px; border-bottom: 1px solid #eee; background: #fff; }
+
+.log-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.filter-actions-group { display: flex; gap: 8px; }
+.filter-actions-group select { width: 140px; }
+
+/* ==========================================================================
+   LOGIN MODULE DISPLAY OVERLAY
+   ========================================================================== */
+.login-wrapper-layer {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, #2d5a27 0%, #173314 100%);
+    display: flex; justify-content: center; align-items: center; z-index: 2000;
+}
+
+.login-premium-card {
+    background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15); width: 100%; max-width: 350px;
+    padding: 30px; border-radius: 20px; text-align: center; color: white;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+.logo-pakchill-container {
+    width: 100px; height: 100px; border-radius: 22%;
+    background: rgba(255,255,255,0.1); margin: 0 auto 15px auto;
     display: flex; justify-content: center; align-items: center;
-    min-height: 100vh; position: fixed;
-    top:0; left:0; width:100%; height:100%; z-index: 999;
-    background: linear-gradient(135deg, #e4f0e2, #cbdcc8);
+    overflow: hidden; border: 2px solid rgba(255,255,255,0.3);
 }
 
-.login-glass-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: var(--ios-blur); -webkit-backdrop-filter: var(--ios-blur);
-    padding: 40px 30px; border-radius: 32px;
-    width: 100%; max-width: 360px; text-align: center;
-    box-shadow: 0 20px 50px rgba(30, 63, 27, 0.12); border: var(--border-ios);
+.logo-pakchill-container img { width: 100%; height: 100%; object-fit: cover; }
+
+.login-premium-card h3 { font-size: 16px; font-weight: 900; letter-spacing: 2px; }
+
+.login-input-box input {
+    text-align: center; font-size: 16px; letter-spacing: 4px; padding: 12px;
+    background: white; color: #000; border: none; border-radius: 8px; margin-bottom: 10px;
 }
 
-.pakchill-logo-placeholder {
-    width: 100px; height: 100px; margin: 0 auto 18px; border-radius: 22%;
-    background: #fff url('logo-pakchill.png') no-repeat center; background-size: cover;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+.btn-login-submit {
+    width: 100%; background: var(--pakchill-gold); color: white;
+    border: none; padding: 12px; font-weight: 900; font-size: 13px;
+    border-radius: 8px; cursor: pointer; letter-spacing: 1px;
 }
 
-input, select, button {
-    width: 100%; padding: 12px 14px; margin-bottom: 10px;
-    border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.08);
-    font-size: 14px; outline: none; transition: all 0.2s ease;
+/* ==========================================================================
+   RESPONSIVE LAYOUT RESPONSIVENESS (MOBILE FRIENDLY)
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .kasir-workspace-grid { grid-template-columns: 1fr; }
+    .owner-management-accordion-grid { grid-template-columns: 1fr; }
+    .management-card-form { grid-column: span 1 !important; }
 }
 
-input:focus, select:focus { border-color: var(--pakchill-green-soft); background: white; box-shadow: 0 0 0 3px rgba(71, 130, 65, 0.15); }
+@media (max-width: 480px) {
+    .products-grid-feed { grid-template-columns: 1fr 1fr; }
+    .app-header-nav { flex-direction: column; gap: 10px; text-align: center; }
+    .header-status-control { width: 100%; justify-content: center; }
+    .checkout-actions-container { grid-template-columns: 1fr; }
+    .grid-core-layout { padding: 10px; }
+}
 
-button.ios-primary-btn { background: var(--pakchill-green-dark); color: white; font-weight: 700; border: none; cursor: pointer; margin-bottom: 0; }
-button.ios-primary-btn:active { transform: scale(0.97); }
-
-.rekap-owner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.card-rekap-box { padding: 20px; border-radius: 20px; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.05); }
-.card-rekap-box h5 { font-size: 12px; text-transform: uppercase; opacity: 0.9; margin-bottom: 5px; letter-spacing: 0.5px; }
-.card-rekap-box h2 { font-size: 24px; font-weight: 800; }
-
-.ios-table-view { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; margin-top: 10px; }
-.ios-table-view th { background: rgba(0,0,0,0.04); padding: 12px 10px; font-weight: 700; color: #444; }
-.ios-table-view td { padding: 12px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); background: white; }
-
-.qris-container-preset { width: 100%; max-width: 220px; margin: 10px auto; border: 1px solid #e0e0e0; border-radius: 14px; padding: 10px; background: white; }
-#live-rekening-info-box { padding: 10px; background: #f0f7ff; border-radius: 10px; font-size: 12px; font-weight: bold; color: #007aff; border: 1px solid #cbdff7; margin-top: 4px; }
-
-#thermal-receipt-output { width: 58mm; padding: 6px; background: #fff; color: #000; font-family: "Courier New", Courier, monospace; font-size: 11px; line-height: 1.2; display: none; }
-
+/* THERMAL PRINTER FORMAT RULES */
 @media print {
-    body * { display: none !important; }
-    #thermal-receipt-output, #thermal-receipt-output * { display: block !important; }
-    #thermal-receipt-output { position: absolute; left: 0; top: 0; width: 58mm; }
+    body * { visibility: hidden; }
+    .thermal-print-area, .thermal-print-area * { visibility: visible; }
+    .thermal-print-area { position: absolute; left: 0; top: 0; width: 58mm; font-family: monospace; font-size: 11px; }
 }
